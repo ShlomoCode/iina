@@ -1755,7 +1755,7 @@ class MainWindowController: PlayerWindowController {
   }
 
   func windowDidMiniaturize(_ notification: Notification) {
-    if Preference.bool(for: .togglePipByMinimizingWindow) && !isWindowMiniaturizedDueToPip {
+    if Preference.bool(for: .togglePipByMinimizingWindow) && !isWindowMiniaturizedDueToPip && player.checkCurrentMediaIsAudio() == .notAudio {
       if #available(macOS 10.12, *) {
         enterPIP()
       }
