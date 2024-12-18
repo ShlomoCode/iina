@@ -16,6 +16,9 @@
 "general.username" = "Nazwa użytkownika";
 "general.password" = "Hasło";
 
+"input.value_is_empty" = "Value cannot be empty.";
+"input.already_exists" = "Value already exists.";
+
 // Guide Window
 "guide.highlights" = "Najważniejsze";
 "guide.basic_settings" = "Ustawienia podstawowe";
@@ -24,7 +27,7 @@
 // Initial Window
 "initial.announcement" = "Używasz wersji %@ IINA";
 "initial.beta.desc" = "Jeśli chcesz wrócić do wersji stabilnej, odznacz \"otrzymuj aktualizacje wersji beta\" w Ustawienia > Ogólne, i zainstaluj stabilne wydanie z naszej <a href=\"https://iina.io\">oficjalnej strony</a>.";
-"initial.nightly.desc" = "Wersje \"Nightly\" nie jest zalecana do codziennego użytku. Aktualnie nie wspierają one automatycznej aktualizacji. Pobierz ręcznie nowsze wydania z naszej <a href=\"https://nightly.iina.io\">strony wersji nightly</a>.";
+"initial.nightly.desc" = "Nightly is not recommended to be used as your daily driver. Currently nightly builds do not support auto update. Please manually download newer builds from our <a href=\"https://nightly.iina.io\">nightly website</a>.";
 "initial.debug.desc" = "Wersje \"Debug\" przeważnie nie są zoptymalizowane pod kątem wydajności, więc nie jest zalecane wykorzystywanie ich jako wersji codziennego użytku. Wersje \"Debug\" nie wspierają automatycznych aktualizacji.";
 "initial.bug_report" = "Zgłoś przez <a href=\"https://github.com/iina/iina/issues\">GitHub issues</a>.";
 
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "Usuwanie przeplotu";
 "quicksetting.hdr" = "HDR";
 "quicksetting.hide" = "Ukryj";
+"quicksetting.reset_speed" = "Reset speed to 1x";
+
+// EQ Presets
+"eq.preset.flat" = "Flat";
+"eq.preset.acoustic" = "Acoustic";
+"eq.preset.classical" = "Classical";
+"eq.preset.dance" = "Dance";
+"eq.preset.deep" = "Deep";
+"eq.preset.electronic" = "Electronic";
+"eq.preset.hip_hop" = "Hip Hop";
+"eq.preset.increase_bass" = "Increase Bass";
+"eq.preset.increase_treble" = "Increase Treble";
+"eq.preset.increase_vocal" = "Increase Vocal";
+"eq.preset.jazz" = "Jazz";
+"eq.preset.latin" = "Latin";
+"eq.preset.loundness" = "Loundness";
+"eq.preset.lounge" = "Lounge";
+"eq.preset.piano" = "Piano";
+"eq.preset.pop" = "Pop";
+"eq.preset.rnb" = "R&B";
+"eq.preset.reduce_bass" = "Reduce Bass";
+"eq.preset.reduce_treble" = "Reduce Treble";
+"eq.preset.rock" = "Rock";
+"eq.preset.small_speaker" = "Small Speaker";
+"eq.preset.spoken_word" = "Spoken Word";
+
+"alert.eq.new_profile.title" = "New EQ Profile";
+"alert.eq.new_profile.message" = "Please enter a profile name.";
+"alert.eq.rename.title" = "Rename Currnet Profile";
+"alert.eq.rename.message" = "Please enter a new profile name.";
 
 // OSDMessage.swift
 "osd.pause" = "Pauza";
 "osd.resume" = "Wznów";
 "osd.volume" = "Głośność: %i";
-"osd.speed" = "Prędkość: %.2fx";
+"osd.speed" = "Speed: %@x";
 "osd.aspect" = "Proporcje obrazu: %@";
 "osd.crop" = "Kadrowanie obrazu: %@";
 "osd.rotate" = "Obrót: %i°";
@@ -72,7 +105,7 @@
 "osd.sub_second_delay.earlier" = "Secondary Subtitle Delay: %.2fs Earlier";
 "osd.sub_second_hidden" = "Secondary Subtitles Hidden";
 "osd.sub_second_pos" = "Secondary Subtitle Position: %.1f";
-"osd.sub_second_visible" = "Secondary Subtitles Visible";
+"osd.sub_second_visible" = ".";
 "osd.mute" = "Wycisz dźwięk";
 "osd.unmute" = "Włącz dźwięk";
 "osd.screenshot" = "Zachowano zrzut ekranu";
@@ -129,10 +162,17 @@
 
 "preference.enable_adv_settings" = "Włącz ustawienia zaawansowane";
 
+"preference.sub_override_level.no" = "no";
 "preference.sub_override_level.force" = "wymuś";
 "preference.sub_override_level.scale" = "scale";
 "preference.sub_override_level.strip" = "pasek";
 "preference.sub_override_level.yes" = "tak";
+
+"preference.sub_override_level.descriptive_text.no" = "Render subtitles as specified by the subtitle scripts, without overrides.";
+"preference.sub_override_level.descriptive_text.force" = "Apply all subtitle styles.";
+"preference.sub_override_level.descriptive_text.scale" = "Apply the scale setting in addition to the style settings in this section.";
+"preference.sub_override_level.descriptive_text.strip" = "Radically strip all ASS tags and styles from the subtitle.";
+"preference.sub_override_level.descriptive_text.yes" = "Apply all the style settings in this section.";
 
 "menu.volume" = "Głośność: %d";
 "menu.volume_muted" = "Głośność: %d (Wyciszono)";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "Wyjdź z trybu muzycznego";
 "menu.pause" = "Pauza";
 "menu.resume" = "Wznów";
-"menu.speed" = "Prędkość: %.2fx";
+"menu.speed" = "Speed: %@x";
 "menu.chapters" = "Panel rozdziałów";
 "menu.hide_chapters" = "Ukryj panel rozdziałów";
 "menu.playlist" = "Panel playlisty";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "Przewiń w przód o %.0fs";
 "menu.seek_backward" = "Przewiń w tył o %.0fs";
-"menu.speed_up" = "Przyspiesz %.1fx";
-"menu.speed_down" = "Spowolnij %.1fx";
+"menu.speed_up" = "Speed Up by %@x";
+"menu.speed_down" = "Speed Down by %@x";
 "menu.volume_up" = "Głośność +%.0f%%";
 "menu.volume_down" = "Głośność -%.0f%%";
 "menu.audio_delay_up" = "Opóźnienie audio +%.1fs";
@@ -204,6 +244,8 @@
 "alert.error_loading_script" = "Nie można załadować skryptu %@!";
 "alert.error_saving_file" = "Podczas zapisywania %@ wystąpił błąd: %@";
 "alert.error_deleting_file" = "Nie można usunąć pliku.";
+
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
 
 "alert.config.new.title" = "Nowa konfiguracja wejściowa";
 "alert.config.new.message" = "Wprowadź nazwę nowej konfiguracji.";

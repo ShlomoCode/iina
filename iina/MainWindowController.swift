@@ -93,6 +93,12 @@ class MainWindowController: PlayerWindowController {
     return playlistView
   }()
 
+  lazy var pluginView: PluginViewController = {
+    let pluginView = PluginViewController()
+    pluginView.mainWindow = self
+    return pluginView
+  }()
+
   /** The control view for interactive mode. */
   var cropSettingsView: CropBoxViewController?
 
@@ -271,12 +277,16 @@ class MainWindowController: PlayerWindowController {
     case hidden // indicating that sidebar is hidden. Should only be used by `sideBarStatus`
     case settings
     case playlist
+    case plugins
+
     func width() -> CGFloat {
       switch self {
       case .settings:
         return SettingsWidth
       case .playlist:
         return CGFloat(Preference.integer(for: .playlistWidth)).clamped(to: PlaylistMinWidth...PlaylistMaxWidth)
+      case .plugins:
+        return SettingsWidth
       default:
         Logger.fatal("SideBarViewType.width shouldn't be called here")
       }
@@ -402,7 +412,7 @@ class MainWindowController: PlayerWindowController {
     }
   }
 
-  var titlebarAccesoryViewController: NSTitlebarAccessoryViewController!
+  var titlebarAccessoryViewController: NSTitlebarAccessoryViewController!
   @IBOutlet var titlebarAccessoryView: NSView!
 
   /** Current OSC view. */
@@ -485,13 +495,10 @@ class MainWindowController: PlayerWindowController {
 
   lazy var _pip: PIPViewController = {
     let pip = VideoPIPViewController()
-    if #available(macOS 10.12, *) {
-      pip.delegate = self
-    }
+    pip.delegate = self
     return pip
   }()
   
-  @available(macOS 10.12, *)
   var pip: PIPViewController {
     _pip
   }
@@ -515,10 +522,10 @@ class MainWindowController: PlayerWindowController {
 
     titleBarView.layerContentsRedrawPolicy = .onSetNeedsDisplay
 
-    titlebarAccesoryViewController = NSTitlebarAccessoryViewController()
-    titlebarAccesoryViewController.view = titlebarAccessoryView
-    titlebarAccesoryViewController.layoutAttribute = .right
-    window.addTitlebarAccessoryViewController(titlebarAccesoryViewController)
+    titlebarAccessoryViewController = NSTitlebarAccessoryViewController()
+    titlebarAccessoryViewController.view = titlebarAccessoryView
+    titlebarAccessoryViewController.layoutAttribute = .right
+    window.addTitlebarAccessoryViewController(titlebarAccessoryViewController)
     updateOnTopIcon()
 
     // size
@@ -553,7 +560,6 @@ class MainWindowController: PlayerWindowController {
     guard let cv = window.contentView else { return }
     cv.autoresizesSubviews = false
     addVideoViewToWindow()
-    window.setIsVisible(true)
 
     // gesture recognizer
     cv.addGestureRecognizer(magnificationGestureRecognizer)
@@ -586,9 +592,7 @@ class MainWindowController: PlayerWindowController {
 
     // other initialization
     osdAccessoryProgress.usesThreadedAnimation = false
-    if #available(macOS 10.14, *) {
-      titleBarBottomBorder.fillColor = NSColor(named: .titleBarBorder)!
-    }
+    titleBarBottomBorder.fillColor = NSColor(named: .titleBarBorder)!
     cachedScreenCount = NSScreen.screens.count
     [titleBarView, osdVisualEffectView, controlBarBottom, controlBarFloating, sideBarView, osdVisualEffectView, pipOverlayView].forEach {
       $0?.state = .active
@@ -650,6 +654,40 @@ class MainWindowController: PlayerWindowController {
     }
 
     player.events.emit(.windowLoaded)
+
+    // Must workaround an AppKit defect in some versions of macOS. This defect is known to exist in
+    // Catalina and Big Sur. The problem was not reproducible in early versions of Monterey. It
+    // reappeared in Ventura. The status of other versions of macOS is unknown, however the
+    // workaround should be safe to apply in any version of macOS. The problem was reported in
+    // issues #4229, #3159, #3097 and #3253. The titles of open windows shown in the "Window" menu
+    // are automatically managed by the AppKit framework. To improve performance PlayerCore caches
+    // and reuses player instances along with their windows. This technique is valid and recommended
+    // by Apple. But in some versions of macOS, if a window is reused the framework will display the
+    // title first used for the window in the "Window" menu even after IINA has updated the title of
+    // the window. This problem can also be seen when right-clicking or control-clicking the IINA
+    // icon in the dock. As a workaround reset the window's title to "Window" before it is reused.
+    // This is the default title AppKit assigns to a window when it is first created. Surprising and
+    // rather disturbing this works as a workaround, but it does.
+    window.title = "Window"
+
+    // As there have been issues in this area, log details about the screen selection process.
+    NSScreen.log("window!.screen", window.screen)
+    NSScreen.log("NSScreen.main", NSScreen.main)
+    NSScreen.screens.enumerated().forEach { screen in
+      NSScreen.log("NSScreen.screens[\(screen.offset)]" , screen.element)
+    }
+
+    var screen = window.selectDefaultScreen()
+
+    if let rectString = UserDefaults.standard.value(forKey: "MainWindowLastPosition") as? String {
+      let rect = NSRectFromString(rectString)
+      if let lastScreen = NSScreen.screens.first(where: { NSPointInRect(rect.origin, $0.visibleFrame) }) {
+        screen = lastScreen
+        NSScreen.log("MainWindowLastPosition \(rect.origin) matched", screen)
+      }
+    }
+
+    videoView.videoLayer.draw(forced: true)
   }
 
   /// Returns the position in seconds for the given percent of the total duration of the video the percentage represents.
@@ -682,10 +720,6 @@ class MainWindowController: PlayerWindowController {
   }
 
   private func setupOSCToolbarButtons(_ buttons: [Preference.ToolBarButton]) {
-    var buttons = buttons
-    if #available(macOS 10.12.2, *) {} else {
-      buttons = buttons.filter { $0 != .pip }
-    }
     fragToolbarView.views.forEach { fragToolbarView.removeView($0) }
     for buttonType in buttons {
       let button = NSButton()
@@ -998,9 +1032,7 @@ class MainWindowController: PlayerWindowController {
     case .hideOSC:
       hideUIAndCursor()
     case .togglePIP:
-      if #available(macOS 10.12, *) {
-        menuTogglePIP(.dummy)
-      }
+      menuTogglePIP(.dummy)
     default:
       break
     }
@@ -1132,57 +1164,10 @@ class MainWindowController: PlayerWindowController {
 
   // MARK: - Window delegate: Open / Close
 
-  func windowWillOpen() {
-    // Must workaround an AppKit defect in some versions of macOS. This defect is known to exist in
-    // Catalina and Big Sur. The problem was not reproducible in early versions of Monterey. It
-    // reappeared in Ventura. The status of other versions of macOS is unknown, however the
-    // workaround should be safe to apply in any version of macOS. The problem was reported in
-    // issues #4229, #3159, #3097 and #3253. The titles of open windows shown in the "Window" menu
-    // are automatically managed by the AppKit framework. To improve performance PlayerCore caches
-    // and reuses player instances along with their windows. This technique is valid and recommended
-    // by Apple. But in some versions of macOS, if a window is reused the framework will display the
-    // title first used for the window in the "Window" menu even after IINA has updated the title of
-    // the window. This problem can also be seen when right-clicking or control-clicking the IINA
-    // icon in the dock. As a workaround reset the window's title to "Window" before it is reused.
-    // This is the default title AppKit assigns to a window when it is first created. Surprising and
-    // rather disturbing this works as a workaround, but it does.
-    window!.title = "Window"
-
-    // As there have been issues in this area, log details about the screen selection process.
-    NSScreen.log("window!.screen", window!.screen, subsystem: subsystem)
-    NSScreen.log("NSScreen.main", NSScreen.main, subsystem: subsystem)
-    NSScreen.screens.enumerated().forEach { screen in
-      NSScreen.log("NSScreen.screens[\(screen.offset)]" , screen.element, subsystem: subsystem)
-    }
-
-    var screen = window!.selectDefaultScreen()
-
-    if let rectString = UserDefaults.standard.value(forKey: "MainWindowLastPosition") as? String {
-      let rect = NSRectFromString(rectString)
-      if let lastScreen = NSScreen.screens.first(where: { NSPointInRect(rect.origin, $0.visibleFrame) }) {
-        screen = lastScreen
-        NSScreen.log("MainWindowLastPosition \(rect.origin) matched", screen, subsystem: subsystem)
-      }
-    }
-
-    if shouldApplyInitialWindowSize, let wfg = windowFrameFromGeometry(newSize: AppData.sizeWhenNoVideo, screen: screen) {
-      window!.setFrame(wfg, display: true, animate: !Preference.bool(for: PK.disableAnimations))
-    } else {
-      window!.setFrame(AppData.sizeWhenNoVideo.centeredRect(in: screen.visibleFrame), display: true,
-                       animate: !Preference.bool(for: PK.disableAnimations))
-    }
-
-    // Draw black screen before playing a video. This is needed due to window reuse. Displaying a
-    // frame from a previously played video would violate good privacy practices.
-    videoView.videoLayer.draw(forced: true)
-  }
-
   /** A method being called when window open. Pretend to be a window delegate. */
-  override func windowDidOpen() {
-    super.windowDidOpen()
+  override func showWindow(_ sender: Any?) {
+    super.showWindow(sender)
 
-    window!.makeMain()
-    window!.makeKeyAndOrderFront(nil)
     resetCollectionBehavior()
     // update buffer indicator view
     updateBufferIndicatorView()
@@ -1221,9 +1206,7 @@ class MainWindowController: PlayerWindowController {
     shouldApplyInitialWindowSize = true
     // Close PIP
     if pipStatus == .inPIP {
-      if #available(macOS 10.12, *) {
-        exitPIP()
-      }
+      exitPIP()
     }
     // stop playing
     if case .fullscreen(legacy: true, priorWindowedFrame: _) = fsState {
@@ -1281,14 +1264,7 @@ class MainWindowController: PlayerWindowController {
 
     // Set the appearance to match the theme so the titlebar matches the theme
     let iinaTheme = Preference.enum(for: .themeMaterial) as Preference.Theme
-    if #available(macOS 10.14, *) {
-      window?.appearance = NSAppearance(iinaTheme: iinaTheme)
-    } else {
-      switch(iinaTheme) {
-      case .dark, .ultraDark: window!.appearance = NSAppearance(named: .vibrantDark)
-      default: window!.appearance = NSAppearance(named: .vibrantLight)
-      }
-    }
+    window?.appearance = NSAppearance(iinaTheme: iinaTheme)
 
     // show titlebar
     if oscPosition == .top {
@@ -1347,15 +1323,12 @@ class MainWindowController: PlayerWindowController {
       }
     }
 
-    if #available(macOS 10.12.2, *) {
-      player.touchBarSupport.toggleTouchBarEsc(enteringFullScr: true)
-    }
+    player.touchBarSupport.toggleTouchBarEsc(enteringFullScr: true)
 
     updateWindowParametersForMPV()
 
     // Exit PIP if necessary
-    if pipStatus == .inPIP,
-      #available(macOS 10.12, *) {
+    if pipStatus == .inPIP {
       exitPIP()
     }
     
@@ -1424,11 +1397,9 @@ class MainWindowController: PlayerWindowController {
       videoView.displayIdle()
     }
 
-    if #available(macOS 10.12.2, *) {
-      player.touchBarSupport.toggleTouchBarEsc(enteringFullScr: false)
-    }
+    player.touchBarSupport.toggleTouchBarEsc(enteringFullScr: false)
 
-    window!.addTitlebarAccessoryViewController(titlebarAccesoryViewController)
+    window!.addTitlebarAccessoryViewController(titlebarAccessoryViewController)
 
     // Must not access mpv while it is asynchronously processing stop and quit commands.
     // See comments in windowWillExitFullScreen for details.
@@ -1675,7 +1646,6 @@ class MainWindowController: PlayerWindowController {
     // Must not access mpv while it is asynchronously processing stop and quit commands.
     // See comments in windowWillExitFullScreen for details.
     guard player.info.state.active else { return }
-    videoView.videoSize = window!.convertToBacking(videoView.bounds).size
     videoView.videoLayer.isAsynchronous = false
     updateWindowParametersForMPV()
   }
@@ -1746,9 +1716,7 @@ class MainWindowController: PlayerWindowController {
 
   func windowDidMiniaturize(_ notification: Notification) {
     if Preference.bool(for: .togglePipByMinimizingWindow) && (!Preference.bool(for: .togglePipByMinimizingWindowForVideoOnly) ||  player.checkCurrentMediaIsAudio() == .notAudio) && !isWindowMiniaturizedDueToPip {
-      if #available(macOS 10.12, *) {
-        enterPIP()
-      }
+      enterPIP()
     }
     player.events.emit(.windowMiniaturized)
   }
@@ -1759,9 +1727,7 @@ class MainWindowController: PlayerWindowController {
       isPausedDueToMiniaturization = false
     }
     if Preference.bool(for: .togglePipByMinimizingWindow) && (!Preference.bool(for: .togglePipByMinimizingWindowForVideoOnly) ||  player.checkCurrentMediaIsAudio() == .notAudio) && !isWindowMiniaturizedDueToPip {
-      if #available(macOS 10.12, *) {
-        exitPIP()
-      }
+      exitPIP()
     }
     player.events.emit(.windowDeminiaturized)
   }
@@ -1871,8 +1837,8 @@ class MainWindowController: PlayerWindowController {
       // When running on an M1 under Big Sur and using legacy full screen.
       //
       // Changes in Big Sur broke the legacy full screen feature. The MainWindowController method
-      // legacyAnimateToFullscreen had to be changed to get this feature working again. Under Big
-      // Sur that method now calls "window.styleMask.remove(.titled)". Removing titled from the
+      // legacyAnimateToFullscreen had to be changed to get this feature working again. Under
+      // Big Sur that method now calls "window.styleMask.remove(.titled)". Removing titled from the
       // style mask causes the AppKit method NSWindow.setTitleWithRepresentedFilename to trigger the
       // exception listed above. This appears to be a defect in the Cocoa framework. The window's
       // title can still be set directly without triggering the exception. The problem seems to be
@@ -1928,7 +1894,7 @@ class MainWindowController: PlayerWindowController {
       osdAccessoryText.baseWritingDirection = .leftToRight
       fallthrough
     case .withText(let text):
-      // data for mustache redering
+      // data for mustache rendering
       let osdData: [String: String] = [
         "duration": player.info.videoDuration?.stringRepresentation ?? Constants.String.videoTimePlaceholder,
         "position": player.info.videoPosition?.stringRepresentation ?? Constants.String.videoTimePlaceholder,
@@ -1986,9 +1952,7 @@ class MainWindowController: PlayerWindowController {
         osdContext = context
       }
 
-      if #available(macOS 10.14, *) {} else {
-        accessoryView.appearance = NSAppearance(named: .vibrantDark)
-      }
+      accessoryView.appearance = NSAppearance(named: .vibrantDark)
       let heightConstraint = NSLayoutConstraint(item: accessoryView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 300)
       heightConstraint.priority = .defaultLow
       heightConstraint.isActive = true
@@ -2191,11 +2155,7 @@ class MainWindowController: PlayerWindowController {
     // prerequisites
     guard let window = window else { return }
 
-    if #available(macOS 10.14, *) {
-      window.backgroundColor = .windowBackgroundColor
-    } else {
-      window.backgroundColor = NSColor(calibratedWhite: 0.1, alpha: 1)
-    }
+    window.backgroundColor = .windowBackgroundColor
 
     let (ow, oh) = player.originalVideoSize
     guard ow != 0 && oh != 0 else {
@@ -2338,15 +2298,15 @@ class MainWindowController: PlayerWindowController {
   /// in the thumbnail extending outside of the window resulting in clipping. This method checks if there is room for the
   /// thumbnail to fully fit in the window. Otherwise the thumbnail must be displayed below the OSC's progress bar.
   /// - Parameters:
-  ///   - timnePreviewYPos: The y-coordinate of the time preview `TextField`.
+  ///   - timePreviewYPos: The y-coordinate of the time preview `TextField`.
   ///   - thumbnailHeight: The height of the thumbnail.
   /// - Returns: `true` if the thumbnail can be shown above the slider, `false` otherwise.
-  private func canShowThumbnailAbove(timnePreviewYPos: Double, thumbnailHeight: Double) -> Bool {
+  private func canShowThumbnailAbove(timePreviewYPos: Double, thumbnailHeight: Double) -> Bool {
     guard oscPosition != .bottom else { return true }
     guard oscPosition != .top else { return false }
     // The layout preference for the on screen controller is set to the default floating layout.
     // Must insure the top of the thumbnail would be below the top of the window.
-    let topOfThumbnail = timnePreviewYPos + timePreviewWhenSeek.frame.height + thumbnailHeight
+    let topOfThumbnail = timePreviewYPos + timePreviewWhenSeek.frame.height + thumbnailHeight
     // Normally the height of the usable area of the window can be obtained from the content
     // layout. But when the legacy full screen preference is enabled the layout height may be
     // larger than the content view if the display contains a camera housing. Use the lower of
@@ -2388,7 +2348,7 @@ class MainWindowController: PlayerWindowController {
 
         let height = round(120 / displayAspectRatio)
         let timePreviewFrameInWindow = timePreviewWhenSeek.superview!.convert(timePreviewWhenSeek.frame.origin, to: nil)
-        let showAbove = canShowThumbnailAbove(timnePreviewYPos: timePreviewFrameInWindow.y, thumbnailHeight: height)
+        let showAbove = canShowThumbnailAbove(timePreviewYPos: timePreviewFrameInWindow.y, thumbnailHeight: height)
         let yPos = showAbove ? timePreviewFrameInWindow.y + timePreviewWhenSeek.frame.height : sliderFrameInWindow.y - height
         thumbnailPeekView.frame.size = NSSize(width: 120, height: height)
         thumbnailPeekView.frame.origin = NSPoint(x: round(posInWindow.x - thumbnailPeekView.frame.width / 2), y: yPos)
@@ -2490,7 +2450,7 @@ class MainWindowController: PlayerWindowController {
   }
 
   /** Set window size when info available, or video size changed. */
-  func adjustFrameByVideoSize() {
+  override func handleVideoSizeChange() {
     guard let window = window else { return }
 
     let (width, height) = player.videoSizeForDisplay
@@ -2498,11 +2458,7 @@ class MainWindowController: PlayerWindowController {
     // set aspect ratio
     let originalVideoSize = NSSize(width: width, height: height)
     window.aspectRatio = originalVideoSize
-    if #available(macOS 10.12, *) {
-      pip.aspectRatio = originalVideoSize
-    }
-
-    videoView.videoSize = window.convertToBacking(videoView.frame).size
+    pip.aspectRatio = originalVideoSize
 
     var rect: NSRect
     let needResizeWindow: Bool
@@ -2580,7 +2536,8 @@ class MainWindowController: PlayerWindowController {
       if let screenFrame = window.screen?.frame {
         rect = rect.constrain(in: screenFrame)
       }
-      if player.disableWindowAnimation || Preference.bool(for: .disableAnimations) {
+
+      if player.disableWindowAnimation || Preference.bool(for: .disableAnimations) || !window.isVisible {
         window.setFrame(rect, display: true, animate: false)
       } else {
         // animated `setFrame` can be inaccurate!
@@ -2704,9 +2661,9 @@ class MainWindowController: PlayerWindowController {
     }
   }
 
-  override func updatePlayButtonState(_ state: NSControl.StateValue) {
-    super.updatePlayButtonState(state)
-    if state == .off {
+  override func updatePlayButtonState(paused: Bool) {
+    super.updatePlayButtonState(paused: paused)
+    if paused {
       speedValueIndex = AppData.availableSpeedValues.count / 2
       leftArrowLabel.isHidden = true
       rightArrowLabel.isHidden = true
@@ -2859,8 +2816,7 @@ class MainWindowController: PlayerWindowController {
         rightArrowLabel.stringValue = String(format: "%.0fx", speedValue)
       }
       // if is paused
-      if playButton.state == .off {
-        updatePlayButtonState(.on)
+      if player.info.state == .paused {
         player.resume()
       }
 
@@ -2873,13 +2829,13 @@ class MainWindowController: PlayerWindowController {
     }
   }
 
-  @IBAction func ontopButtonnAction(_ sender: NSButton) {
+  @IBAction func ontopButtonAction(_ sender: NSButton) {
     setWindowFloatingOnTop(!isOntop)
   }
 
   func showSettingsSidebar(tab: QuickSettingViewController.TabViewType? = nil, force: Bool = false, hideIfAlreadyShown: Bool = true) {
     if !force && sidebarAnimationState == .willShow || sidebarAnimationState == .willHide {
-      return  // do not interrput other actions while it is animating
+      return  // do not interrupt other actions while it is animating
     }
     let view = quickSettingView
     switch sideBarStatus {
@@ -2888,7 +2844,7 @@ class MainWindowController: PlayerWindowController {
         view.pleaseSwitchToTab(tab)
       }
       showSideBar(viewController: view, type: .settings)
-    case .playlist:
+    case .playlist, .plugins:
       if let tab = tab {
         view.pleaseSwitchToTab(tab)
       }
@@ -2908,7 +2864,7 @@ class MainWindowController: PlayerWindowController {
 
   func showPlaylistSidebar(tab: PlaylistViewController.TabViewType? = nil, force: Bool = false, hideIfAlreadyShown: Bool = true) {
     if !force && sidebarAnimationState == .willShow || sidebarAnimationState == .willHide {
-      return  // do not interrput other actions while it is animating
+      return  // do not interrupt other actions while it is animating
     }
     let view = playlistView
     switch sideBarStatus {
@@ -2917,7 +2873,7 @@ class MainWindowController: PlayerWindowController {
         view.pleaseSwitchToTab(tab)
       }
       showSideBar(viewController: view, type: .playlist)
-    case .settings:
+    case .settings, .plugins:
       if let tab = tab {
         view.pleaseSwitchToTab(tab)
       }
@@ -2926,6 +2882,35 @@ class MainWindowController: PlayerWindowController {
       }
     case .playlist:
       if view.currentTab == tab || tab == nil {
+        if hideIfAlreadyShown {
+          hideSideBar()
+        }
+      } else if let tab = tab {
+        view.pleaseSwitchToTab(tab)
+      }
+    }
+  }
+
+  func showPluginSidebar(tab: String?, force: Bool = false, hideIfAlreadyShown: Bool = true) {
+    if !force && sidebarAnimationState == .willShow || sidebarAnimationState == .willHide {
+      return  // do not interrupt other actions while it is animating
+    }
+    let view = pluginView
+    switch sideBarStatus {
+    case .hidden:
+      if let tab = tab {
+        view.pleaseSwitchToTab(tab)
+      }
+      showSideBar(viewController: view, type: .plugins)
+    case .settings, .playlist:
+      if let tab = tab {
+        view.pleaseSwitchToTab(tab)
+      }
+      hideSideBar {
+        self.showSideBar(viewController: view, type: .plugins)
+      }
+    case .plugins:
+      if view.currentPluginID == tab || tab == nil {
         if hideIfAlreadyShown {
           hideSideBar()
         }
@@ -2958,12 +2943,10 @@ class MainWindowController: PlayerWindowController {
     case .musicMode:
       player.switchToMiniPlayer()
     case .pip:
-      if #available(macOS 10.12, *) {
-        if pipStatus == .inPIP {
-          exitPIP()
-        } else if pipStatus == .notInPIP {
-          enterPIP()
-        }
+      if pipStatus == .inPIP {
+        exitPIP()
+      } else if pipStatus == .notInPIP {
+        enterPIP()
       }
     case .playlist:
       showPlaylistSidebar()
@@ -2973,6 +2956,8 @@ class MainWindowController: PlayerWindowController {
       quickSettingView.showSubChooseMenu(forView: sender, showLoadedSubs: true)
     case .screenshot:
       player.screenshot()
+    case .plugins:
+      showPluginSidebar(tab: nil)
     }
   }
 
@@ -2991,7 +2976,6 @@ class MainWindowController: PlayerWindowController {
 
 // MARK: - Picture in Picture
 
-@available(macOS 10.12, *)
 extension MainWindowController: PIPViewControllerDelegate {
 
   func enterPIP() {

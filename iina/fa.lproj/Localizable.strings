@@ -16,6 +16,9 @@
 "general.username" = "نام کاربری";
 "general.password" = "رمز عبور";
 
+"input.value_is_empty" = "Value cannot be empty.";
+"input.already_exists" = "Value already exists.";
+
 // Guide Window
 "guide.highlights" = "تازه‌ها";
 "guide.basic_settings" = "تنظیمات پایه";
@@ -24,7 +27,7 @@
 // Initial Window
 "initial.announcement" = "شما در حال استفاده از نسخه %@ برنامه IINA میباشید";
 "initial.beta.desc" = "تیک گزینه‌ی “دریافت بروزرسانی‌های بتا” را از بخش تنظیمات - عمومی بردارید و یک نسخه‌ی پایدار را از <a href=\"https://iina.io\">سایت رسمی ما</a> نصب کنید.";
-"initial.nightly.desc" = "حالت شب برای استفاده روزانه پیشنهاد نمیشود. درحال حاضر نسخه حالت شب از بروزرسانی خودکار پشتیبانی نمیکند. لطفا برای دریافت دستی جدیدترین بروزرسانی به <a href=\"https://nightly.iina.io\"> وبسایت ما</a> مراجعه فرمایید.";
+"initial.nightly.desc" = "Nightly is not recommended to be used as your daily driver. Currently nightly builds do not support auto update. Please manually download newer builds from our <a href=\"https://nightly.iina.io\">nightly website</a>.";
 "initial.debug.desc" = "نسخه دیباگ معمولا کامل بهینه سازی نشده است ، پس برای استفاده روزانه پیشنهاد نمیشود. نسخه دیباگ از بروزرسانی خودکار پیشتیبانی نمیکنند.";
 "initial.bug_report" = "مشکلات را از طریق <a href=\"https://github.com/iina/iina/issues\"> با ما درمیان بگذارید</a>.";
 
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "تبدیل تصویر به غیر interlace";
 "quicksetting.hdr" = "اچ‌دی‌آر";
 "quicksetting.hide" = "پنهان کردن";
+"quicksetting.reset_speed" = "Reset speed to 1x";
+
+// EQ Presets
+"eq.preset.flat" = "Flat";
+"eq.preset.acoustic" = "Acoustic";
+"eq.preset.classical" = "Classical";
+"eq.preset.dance" = "Dance";
+"eq.preset.deep" = "Deep";
+"eq.preset.electronic" = "Electronic";
+"eq.preset.hip_hop" = "Hip Hop";
+"eq.preset.increase_bass" = "Increase Bass";
+"eq.preset.increase_treble" = "Increase Treble";
+"eq.preset.increase_vocal" = "Increase Vocal";
+"eq.preset.jazz" = "Jazz";
+"eq.preset.latin" = "Latin";
+"eq.preset.loundness" = "Loundness";
+"eq.preset.lounge" = "Lounge";
+"eq.preset.piano" = "Piano";
+"eq.preset.pop" = "Pop";
+"eq.preset.rnb" = "R&B";
+"eq.preset.reduce_bass" = "Reduce Bass";
+"eq.preset.reduce_treble" = "Reduce Treble";
+"eq.preset.rock" = "Rock";
+"eq.preset.small_speaker" = "Small Speaker";
+"eq.preset.spoken_word" = "Spoken Word";
+
+"alert.eq.new_profile.title" = "New EQ Profile";
+"alert.eq.new_profile.message" = "Please enter a profile name.";
+"alert.eq.rename.title" = "Rename Currnet Profile";
+"alert.eq.rename.message" = "Please enter a new profile name.";
 
 // OSDMessage.swift
 "osd.pause" = "مکث";
 "osd.resume" = "ادامه";
 "osd.volume" = "بلندی صدا: %i";
-"osd.speed" = "سرعت: %.2f برابر";
+"osd.speed" = "Speed: %@x";
 "osd.aspect" = "نسبت تصویر: %@";
 "osd.crop" = "برش: %@";
 "osd.rotate" = "چرخش: %i";
@@ -129,10 +162,17 @@
 
 "preference.enable_adv_settings" = "فعال‌سازی تنظیمات پیشرفته";
 
+"preference.sub_override_level.no" = "no";
 "preference.sub_override_level.force" = "force";
 "preference.sub_override_level.scale" = "scale";
 "preference.sub_override_level.strip" = "strip";
 "preference.sub_override_level.yes" = "بله";
+
+"preference.sub_override_level.descriptive_text.no" = "Render subtitles as specified by the subtitle scripts, without overrides.";
+"preference.sub_override_level.descriptive_text.force" = "Apply all subtitle styles.";
+"preference.sub_override_level.descriptive_text.scale" = "Apply the scale setting in addition to the style settings in this section.";
+"preference.sub_override_level.descriptive_text.strip" = "Radically strip all ASS tags and styles from the subtitle.";
+"preference.sub_override_level.descriptive_text.yes" = "Apply all the style settings in this section.";
 
 "menu.volume" = "بلندی صدا: %d";
 "menu.volume_muted" = "صدا: %d (بی صدا)";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "Exit Music Mode";
 "menu.pause" = "مکث";
 "menu.resume" = "ادامه";
-"menu.speed" = "سرعت: %.2f برابر";
+"menu.speed" = "Speed: %@x";
 "menu.chapters" = "پنل سرفصل های فیلم رو نشون بده";
 "menu.hide_chapters" = "پنل سرفصل های فیلم رو پنهان کن";
 "menu.playlist" = "نمایش لیست تماشا";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "%.0f ثانیه به جلو";
 "menu.seek_backward" = "%.0f ثانیه به عقب";
-"menu.speed_up" = "بالا بردن سرعت به مقدار %.1fx";
-"menu.speed_down" = "پایین آوردن سرعت به مقدار %.1fx";
+"menu.speed_up" = "Speed Up by %@x";
+"menu.speed_down" = "Speed Down by %@x";
 "menu.volume_up" = "افزایش صدا + %.0f%%";
 "menu.volume_down" = "کاهش صدا - %.0f%%";
 "menu.audio_delay_up" = "تاخیر صدا + %.1f ثانيه";
@@ -204,6 +244,8 @@
 "alert.error_loading_script" = "این اسکریپت باز نمی شود: %@";
 "alert.error_saving_file" = "Error occurred when saving %@: %@";
 "alert.error_deleting_file" = "فایل دیلیت نمی شود.";
+
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
 
 "alert.config.new.title" = "New Input Configuration";
 "alert.config.new.message" = "Please enter a name for the new configuration.";

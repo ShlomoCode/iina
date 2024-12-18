@@ -31,10 +31,11 @@ class MainMenuActionHandler: NSResponder, NSMenuItemValidation {
     Utility.quickSavePanel(title: "Save to playlist", types: ["m3u8"], sheetWindow: player.currentWindow) { (url) in
       if url.isFileURL {
         var playlist = ""
-        for item in self.player.info.playlist {
-          playlist.append((item.filename + "\n"))
+        self.player.info.$playlist.withLock {
+          for item in $0 {
+            playlist.append((item.filename + "\n"))
+          }
         }
-
         do {
           try playlist.write(to: url, atomically: true, encoding: String.Encoding.utf8)
         } catch let error as NSError {
@@ -89,8 +90,8 @@ extension MainMenuActionHandler {
 
   @objc func menuStop(_ sender: NSMenuItem) {
     // FIXME: handle stop
-    player.stop()
     player.sendOSD(.stop)
+    player.stop()
   }
 
   @objc func menuStep(_ sender: NSMenuItem) {
@@ -411,7 +412,6 @@ extension MainMenuActionHandler {
         self.player.sendOSD(.downloadedSub(
           urls.map({ $0.lastPathComponent }).joined(separator: "\n")
         ))
-        self.player.info.haveDownloadedSub = true
       }
       self.player.isSearchingOnlineSubtitle = false
     }
@@ -472,14 +472,39 @@ extension MainMenuActionHandler {
     default:
       break
     }
-    return menuItem.isEnabled
+    return true
   }
-  
+
   // MARK: - Plugin
 
+  @objc func showPluginsPanel(_ sender: NSMenuItem) {
+    player.mainWindow.showPluginSidebar(tab: nil)
+  }
+
   @objc func reloadAllPlugins(_ sender: NSMenuItem) {
-    for plugin in JavascriptPlugin.plugins {
-      player.reloadPlugin(plugin, forced: true)
+    AppDelegate.shared.menuController.pluginMenu.removeAllItems()
+
+    for player in PlayerCore.playerCores {
+      player.clearPlugins()
+    }
+
+    JavascriptPlugin.recreateAllPlugins()
+    JavascriptPlugin.loadGlobalInstances()
+
+    for player in PlayerCore.playerCores {
+      for plugin in JavascriptPlugin.plugins {
+        player.reloadPlugin(plugin, forced: true)
+      }
+      // Try to emit the events that are already emitted.
+      // Of course this is not exhaustive, so users shouldn't rely on this function
+      if player.mainWindow.loaded {
+        player.events.emit(.windowLoaded)
+      }
+      player.events.emit(.mpvInitialized)
+      if player.info.state == .playing {
+        player.events.emit(.fileLoaded)
+        player.events.emit(.fileStarted)
+      }
     }
   }
 }

@@ -16,6 +16,9 @@
 "general.username" = "用户名";
 "general.password" = "口令";
 
+"input.value_is_empty" = "数值不能为空";
+"input.already_exists" = "值已经存在。";
+
 // Guide Window
 "guide.highlights" = "更新亮点";
 "guide.basic_settings" = "基本设置";
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "反交错";
 "quicksetting.hdr" = "HDR";
 "quicksetting.hide" = "隐藏";
+"quicksetting.reset_speed" = "Reset speed to 1x";
+
+// EQ Presets
+"eq.preset.flat" = "平坦";
+"eq.preset.acoustic" = "原声";
+"eq.preset.classical" = "古典";
+"eq.preset.dance" = "舞曲";
+"eq.preset.deep" = "深";
+"eq.preset.electronic" = "电子乐";
+"eq.preset.hip_hop" = "嘻哈";
+"eq.preset.increase_bass" = "增加低音";
+"eq.preset.increase_treble" = "增加高音";
+"eq.preset.increase_vocal" = "增加人声";
+"eq.preset.jazz" = "爵士";
+"eq.preset.latin" = "拉丁音乐";
+"eq.preset.loundness" = "响度";
+"eq.preset.lounge" = "驰放音乐";
+"eq.preset.piano" = "钢琴音乐";
+"eq.preset.pop" = "流行音乐";
+"eq.preset.rnb" = "节奏蓝调";
+"eq.preset.reduce_bass" = "减少低音";
+"eq.preset.reduce_treble" = "减少高音";
+"eq.preset.rock" = "摇滚";
+"eq.preset.small_speaker" = "小型扬声器";
+"eq.preset.spoken_word" = "朗诵诗音乐";
+
+"alert.eq.new_profile.title" = "新EQ 配置文件";
+"alert.eq.new_profile.message" = "请输入个人资料名称。";
+"alert.eq.rename.title" = "重命名当前的配置文件";
+"alert.eq.rename.message" = "请输入新的配置文件名称：";
 
 // OSDMessage.swift
 "osd.pause" = "暂停";
 "osd.resume" = "继续";
 "osd.volume" = "音量：%i";
-"osd.speed" = "速度：%.2fx";
+"osd.speed" = "Speed: %@x";
 "osd.aspect" = "长宽比：%@";
 "osd.crop" = "裁切：%@";
 "osd.rotate" = "旋转：%i°";
@@ -129,10 +162,17 @@
 
 "preference.enable_adv_settings" = "启用高级设置";
 
-"preference.sub_override_level.force" = "";
+"preference.sub_override_level.no" = "不";
+"preference.sub_override_level.force" = "强制";
 "preference.sub_override_level.scale" = "缩放";
 "preference.sub_override_level.strip" = "条形";
 "preference.sub_override_level.yes" = "是";
+
+"preference.sub_override_level.descriptive_text.no" = "按照字幕脚本的指定渲染字幕，不覆盖。";
+"preference.sub_override_level.descriptive_text.force" = "应用所有字幕样式。";
+"preference.sub_override_level.descriptive_text.scale" = "在除本节中的样式设置外应用音阶设置";
+"preference.sub_override_level.descriptive_text.strip" = "从字幕中彻底去掉所有的ASS标签和样式。";
+"preference.sub_override_level.descriptive_text.yes" = "应用本节中的所有样式设置。";
 
 "menu.volume" = "音量: %d";
 "menu.volume_muted" = "音量：%d （静音）";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "退出音乐模式";
 "menu.pause" = "暂停";
 "menu.resume" = "继续";
-"menu.speed" = "速度: %.2fx";
+"menu.speed" = "Speed: %@x";
 "menu.chapters" = "显示章节面板";
 "menu.hide_chapters" = "隐藏章节面板";
 "menu.playlist" = "显示播放列表面板";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "渐进 %.0f秒";
 "menu.seek_backward" = "渐退 %.0f秒";
-"menu.speed_up" = "加速 %.1f 倍";
-"menu.speed_down" = "减速 %.1f 倍";
+"menu.speed_up" = "Speed Up by %@x";
+"menu.speed_down" = "Speed Down by %@x";
 "menu.volume_up" = "音量 + %.0f%%";
 "menu.volume_down" = "音量 - %.0f%%";
 "menu.audio_delay_up" = "音频延迟 + %.1f秒";
@@ -204,6 +244,8 @@
 "alert.error_loading_script" = "无法加载脚本 %@！";
 "alert.error_saving_file" = "保存 %@时出错： %@";
 "alert.error_deleting_file" = "无法删除该文件。";
+
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
 
 "alert.config.new.title" = "新建输入配置";
 "alert.config.new.message" = "请为此新配置输入名称。";

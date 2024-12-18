@@ -258,7 +258,7 @@ class OpenSub {
     /// Filter out unsupported language codes.
     ///
     /// IINA's `Preferred language` setting is used when automatically loading local subtitle files as well as when downloading
-    /// from subtitle sites. As a result it may contian language codes not supported by Open Subtitles. When logging is enabled this
+    /// from subtitle sites. As a result it may contain language codes not supported by Open Subtitles. When logging is enabled this
     /// method will log the language codes in the setting that are not supported by Open Subtitles and will be ignored. This is only
     /// done for ease of debugging.
     func filterLanguageCodes() -> Promise<Void> {
@@ -293,7 +293,7 @@ class OpenSub {
     /// Open Subtitles requests that applications logout of of user sessions so that they can free resources. This is discussed in the
     /// [Best Practices](https://opensubtitles.stoplight.io/docs/opensubtitles-api/6ef2e232095c7-best-practices)
     /// section of the Open Subtitles REST API documentation.
-    /// - Parameter timeout: The timeout to to use for the the request.
+    /// - Parameter timeout: The timeout to to use for the request.
     override func logout(timeout: TimeInterval? = nil) -> Promise<Void> {
       guard OpenSubClient.shared.loggedIn else {
         log("Not logged in to Open Subtitles")

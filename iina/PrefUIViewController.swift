@@ -29,7 +29,7 @@ class PrefUIViewController: PreferenceViewController, PreferenceWindowEmbeddable
   }
 
   var preferenceTabImage: NSImage {
-    return NSImage(named: NSImage.Name("pref_ui"))!
+    return makeSymbol("macwindow", fallbackImage: "pref_ui")
   }
 
   static var oscToolbarButtons: [Preference.ToolBarButton] {
@@ -87,18 +87,6 @@ class PrefUIViewController: PreferenceViewController, PreferenceWindowEmbeddable
     setupGeometryRelatedControls()
     setupResizingRelatedControls()
     setupPipBehaviorRelatedControls()
-
-    let removeThemeMenuItemWithTag = { (tag: Int) in
-      if let item = self.themeMenu.item(withTag: tag) {
-        self.themeMenu.removeItem(item)
-      }
-    }
-    if #available(macOS 10.14, *) {
-      removeThemeMenuItemWithTag(Preference.Theme.mediumLight.rawValue)
-      removeThemeMenuItemWithTag(Preference.Theme.ultraDark.rawValue)
-    } else {
-      removeThemeMenuItemWithTag(Preference.Theme.system.rawValue)
-    }
   }
 
   @IBAction func oscPositionPopupBtnAction(_ sender: NSPopUpButton) {

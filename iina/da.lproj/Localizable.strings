@@ -16,6 +16,9 @@
 "general.username" = "Brugernavn";
 "general.password" = "Kodeord";
 
+"input.value_is_empty" = "Værdien kan ikke være tom.";
+"input.already_exists" = "Værdien findes allerede.";
+
 // Guide Window
 "guide.highlights" = "Højdepunkter";
 "guide.basic_settings" = "Grundlæggende indstillinger";
@@ -24,7 +27,7 @@
 // Initial Window
 "initial.announcement" = "Du bruger en %@ version af IINA";
 "initial.beta.desc" = "Hvis du ønsker at vende tilbage til en udgivelsesversion, skal du fjerne markeringen af \"modtag betaopdateringer\" fra Indstillinger > Generelt, og installere en stabil udgivelse fra vores <a href=\"https://iina.io\">officielle hjemmeside</a>.";
-"initial.nightly.desc" = "Nightly er ikke anbefalet til daglig brug. Nuværende nightly builds understøtter ikke automatisk opdatering. Installer nye versioner fra vores <a href=\"https://nightly.iina.io\">hjemmeside</a>.";
+"initial.nightly.desc" = "Nightly is not recommended to be used as your daily driver. Currently nightly builds do not support auto update. Please manually download newer builds from our <a href=\"https://nightly.iina.io\">nightly website</a>.";
 "initial.debug.desc" = "Debug builds er normalt ikke optimeret til ydeevne, så det anbefales ikke at blive brugt til daglig brug. Debug builds understøtter ikke automatisk opdatering.";
 "initial.bug_report" = "Meld fejl via <a href=\"https://github.com/iina/iina/issues\">Github Issues</a>.";
 
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "Deinterlace";
 "quicksetting.hdr" = "HDR";
 "quicksetting.hide" = "Skjul";
+"quicksetting.reset_speed" = "Reset speed to 1x";
+
+// EQ Presets
+"eq.preset.flat" = "Flat";
+"eq.preset.acoustic" = "Akustisk";
+"eq.preset.classical" = "Klassisk";
+"eq.preset.dance" = "Dance";
+"eq.preset.deep" = "Dyb";
+"eq.preset.electronic" = "Elektronisk";
+"eq.preset.hip_hop" = "Hip-hop";
+"eq.preset.increase_bass" = "Forøg bas";
+"eq.preset.increase_treble" = "Forøg diskant";
+"eq.preset.increase_vocal" = "Forøg vokal";
+"eq.preset.jazz" = "Jazz";
+"eq.preset.latin" = "Latin";
+"eq.preset.loundness" = "Loundness";
+"eq.preset.lounge" = "Lounge";
+"eq.preset.piano" = "Piano";
+"eq.preset.pop" = "Pop";
+"eq.preset.rnb" = "R&B";
+"eq.preset.reduce_bass" = "Reducer Bas";
+"eq.preset.reduce_treble" = "Reducer diskant";
+"eq.preset.rock" = "Rock";
+"eq.preset.small_speaker" = "Små højttalere";
+"eq.preset.spoken_word" = "Talte ord";
+
+"alert.eq.new_profile.title" = "New EQ Profile";
+"alert.eq.new_profile.message" = "Please enter a profile name.";
+"alert.eq.rename.title" = "Rename Currnet Profile";
+"alert.eq.rename.message" = "Please enter a new profile name.";
 
 // OSDMessage.swift
 "osd.pause" = "Pause";
 "osd.resume" = "Genoptag";
 "osd.volume" = "Volumen: %i";
-"osd.speed" = "Hastighed: %.2fx";
+"osd.speed" = "Speed: %@x";
 "osd.aspect" = "Aspekt Ratio: %@";
 "osd.crop" = "Beskær: %@";
 "osd.rotate" = "Roter: %i°";
@@ -92,8 +125,8 @@
 "osd.find_online_sub" = "Leder efter undertekster online...";
 "osd.find_online_sub.source" = "fra";
 "osd.sub_not_found" = "Ingen undertekster fundet";
-"osd.sub_found" = "%d subtitles found.";
-"osd.sub_downloading" = "Downloading %d subtitles";
+"osd.sub_found" = "%d undertekster fundet.";
+"osd.sub_downloading" = "Downloader %d undertekster";
 "osd.sub_downloaded" = "Undertekster downloadet";
 "osd.sub_saved" = "Undertekster gemt";
 "osd.network_error" = "Netværksfejl";
@@ -129,19 +162,26 @@
 
 "preference.enable_adv_settings" = "Aktiver avancerede indstillinger";
 
-"preference.sub_override_level.force" = "force";
-"preference.sub_override_level.scale" = "scale";
+"preference.sub_override_level.no" = "no";
+"preference.sub_override_level.force" = "gennemtving";
+"preference.sub_override_level.scale" = "skaler";
 "preference.sub_override_level.strip" = "strip";
-"preference.sub_override_level.yes" = "yes";
+"preference.sub_override_level.yes" = "ja";
+
+"preference.sub_override_level.descriptive_text.no" = "Render subtitles as specified by the subtitle scripts, without overrides.";
+"preference.sub_override_level.descriptive_text.force" = "Apply all subtitle styles.";
+"preference.sub_override_level.descriptive_text.scale" = "Apply the scale setting in addition to the style settings in this section.";
+"preference.sub_override_level.descriptive_text.strip" = "Radically strip all ASS tags and styles from the subtitle.";
+"preference.sub_override_level.descriptive_text.yes" = "Apply all the style settings in this section.";
 
 "menu.volume" = "Volumen: %d";
 "menu.volume_muted" = "Lydstyrke: %d (Lydløs)";
 "menu.audio_delay" = "Lydforsinkelse: %.2fs";
 "menu.sub_delay" = "Undertekstforsinkelse: %.2fs";
-"menu.sub_hide" = "Hide Subtitles";
-"menu.sub_show" = "Show Subtitles";
-"menu.sub_second_hide" = "Hide Secondary Subtitles";
-"menu.sub_second_show" = "Show Secondary Subtitles";
+"menu.sub_hide" = "Skjul undertekster";
+"menu.sub_show" = "Vis undertekster";
+"menu.sub_second_hide" = "Skjul sekundære undertekster";
+"menu.sub_second_show" = "Vis sekundære undertekster";
 "menu.fullscreen" = "Gå til fuldskærmsvisning";
 "menu.exit_fullscreen" = "Afslut fuldskærmsvisning";
 "menu.pip" = "Gå til Picture-in-Picture";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "Afslut musiktilstand";
 "menu.pause" = "Pause";
 "menu.resume" = "Genoptag";
-"menu.speed" = "Hastighed: %.2fx";
+"menu.speed" = "Speed: %@x";
 "menu.chapters" = "Vis kapitel-panel";
 "menu.hide_chapters" = "Skjul kapitel-panel";
 "menu.playlist" = "Vis Playlist Panel";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "Spol frem %.0fs";
 "menu.seek_backward" = "Spol tilbage %.0fs";
-"menu.speed_up" = "Hastighed sætten op til %.1fx";
-"menu.speed_down" = "Hastighed nedsættes til %.1fx";
+"menu.speed_up" = "Speed Up by %@x";
+"menu.speed_down" = "Speed Down by %@x";
 "menu.volume_up" = "Volumen + %.0f%%";
 "menu.volume_down" = "Volumen - %.0f%%";
 "menu.audio_delay_up" = "Lydforsinkelse + %.1fs";
@@ -205,6 +245,8 @@
 "alert.error_saving_file" = "Fejl under forsøg på at gemme %@: %@";
 "alert.error_deleting_file" = "Kan ikke slette fil.";
 
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
+
 "alert.config.new.title" = "Ny input konfiguration";
 "alert.config.new.message" = "Indtast et navn til den nye konfiguration.";
 "alert.config.duplicate.title" = "Dupliker konfiguration";
@@ -216,7 +258,7 @@
 "alert.config.cannot_create" = "Kan ikke oprette config filen!";
 "alert.config.cannot_write" = "Kan ikke skrive til config filen!";
 "alert.config.rename.title" = "Rename Input Configuration";
-"alert.config.rename.message" = "Please enter the new name for the configuration.";
+"alert.config.rename.message" = "Indtast et navn til den nye konfiguration.";
 
 "alert.filter.incorrect" = "Fejl opstået under anvendelse af filtre. Venligst tjek dit parameter format.";
 "alert.add_filter.title" = "Nyt filter";
@@ -294,7 +336,7 @@
 
 "alert.plugin_uninstall.title" = "Er du sikker på at du vil afinstallere %@?";
 "alert.plugin_uninstall.message" = "Denne udvidelse vil blive fjernet fra din harddisk.";
-"alert.plugin_reinstall.title" = "Plugin %@ already exists";
+"alert.plugin_reinstall.title" = "Pluginet %@ findes allerede";
 "alert.plugin_reinstall.message" = "Do you want to reinstall the plugin?";
 "alert.duplicated_plugin_id" = "Duplicated plugin identifiers detected. Two or more plugins have the same identifier \"%@\". This may cause abnormal behaviors. Please find them in Preferences - Plugins and report to their authors. If a plugin is installed locally, you can also manually change its identifier in the plugin's Info.json file.";
 "alert.plugin_no_update" = "Ingen nye opdateringer fundet.";
@@ -343,7 +385,7 @@
 "osc_toolbar.full_screen" = "Skift fuld skærm";
 "osc_toolbar.music_mode" = "Gå i musik-tilstand";
 "osc_toolbar.sub_track" = "Vælg undertekstspor";
-"osc_toolbar.screenshot" = "Take a screenshot";
+"osc_toolbar.screenshot" = "Tag et skærmbillede";
 
 "mini_player.album_art" = "Slå album art Til/Fra";
 "mini_player.loop" = "Gentag";

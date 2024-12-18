@@ -20,9 +20,12 @@ struct AppData {
   // Stopgap for https://github.com/mpv-player/mpv/issues/4000
   static let availableSpeedValues: [Double] = [0.03125, 0.0625, 0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32]
 
-  /** min/max speed for playback **/
+  // Min/max speed for playback speed slider in Quick Settings
   static let minSpeed = 0.25
   static let maxSpeed = 16.0
+
+  /// Lowest possible speed allowed by mpv (0.01x)
+  static let mpvMinPlaybackSpeed = 0.01
 
   /** generate aspect and crop options in menu */
   static let aspects: [String] = ["4:3", "5:4", "16:9", "16:10", "1:1", "3:2", "2.21:1", "2.35:1", "2.39:1"]
@@ -52,7 +55,6 @@ struct AppData {
   static let crowdinMembersLink = "https://crowdin.com/project/iina"
   static let wikiLink = "https://github.com/iina/iina/wiki"
   static let websiteLink = "https://iina.io"
-  static let emailLink = "developers@iina.io"
   static let ytdlHelpLink = "https://github.com/rg3/youtube-dl/blob/master/README.md#readme"
   static let appcastLink = "https://www.iina.io/appcast.xml"
   static let appcastBetaLink = "https://www.iina.io/appcast-beta.xml"
@@ -64,6 +66,7 @@ struct AppData {
   static let algorithmHelpLink = "https://mpv.io/manual/stable/#options-tone-mapping"
   static let disableAnimationsHelpLink = "https://developer.apple.com/design/human-interface-guidelines/accessibility#Motion"
   static let gainAdjustmentHelpLink = "https://mpv.io/manual/stable/#options-replaygain"
+  static let audioDriverHellpLink = "https://mpv.io/manual/stable/#audio-output-drivers-coreaudio"
 
   static let widthWhenNoVideo = 640
   static let heightWhenNoVideo = 360
@@ -86,8 +89,6 @@ struct Constants {
     static let resume = NSLocalizedString("menu.resume", comment: "Resume")
     static let `default` = NSLocalizedString("quicksetting.item_default", comment: "Default")
     static let none = NSLocalizedString("quicksetting.item_none", comment: "None")
-    static let audioDelay = "Audio Delay"
-    static let subDelay = "Subtitle Delay"
     static let pip = NSLocalizedString("menu.pip", comment: "Enter Picture-in-Picture")
     static let exitPIP = NSLocalizedString("menu.exit_pip", comment: "Exit Picture-in-Picture")
     static let miniPlayer = NSLocalizedString("menu.mini_player", comment: "Enter Music Mode")
@@ -108,6 +109,9 @@ struct Constants {
     static let showSubtitles = NSLocalizedString("menu.sub_show", comment: "Show Subtitles")
     static let hideSecondSubtitles = NSLocalizedString("menu.sub_second_hide", comment: "Hide Second Subtitles")
     static let showSecondSubtitles = NSLocalizedString("menu.sub_second_show", comment: "Show Second Subtitles")
+    static let managePlugins = NSLocalizedString("menu.manage_plugins", comment: "Manage Plugins…")
+    static let showPluginsPanel = NSLocalizedString("menu.show_plugins_panel", comment: "Show Plugins Panel")
+    static let hidePluginsPanel = NSLocalizedString("menu.hide_plugins_panel", comment: "Hide Plugins Panel")
   }
   struct Time {
     static let infinite = VideoTime(999, 0, 0)
@@ -148,4 +152,9 @@ extension Notification.Name {
   static let iinaLogoutCompleted = Notification.Name("iinaLoggedOutOfSubtitleProvider")
   static let iinaSecondSubVisibilityChanged = Notification.Name("iinaSecondSubVisibilityChanged")
   static let iinaSubVisibilityChanged = Notification.Name("iinaSubVisibilityChanged")
+  static let iinaHistoryTaskFinished = Notification.Name("iinaHistoryTaskFinished")
+}
+
+enum IINAError: Error {
+  case unsupportedMPVNodeFormat(UInt32)
 }

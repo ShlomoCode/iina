@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import UniformTypeIdentifiers
 
 typealias PK = Preference.Key
 
@@ -35,26 +36,7 @@ class Utility {
   typealias InputValidator<T> = (T) -> ValidationResult
 
   // MARK: - Logs, alerts
-
-  @available(*, deprecated, message: "showAlert(message:alertStyle:) is deprecated, use showAlert(_ key:comment:arguments:alertStyle:) instead")
-  static func showAlert(message: String, alertStyle: NSAlert.Style = .critical) {
-    let alert = NSAlert()
-    switch alertStyle {
-    case .critical:
-      alert.messageText = NSLocalizedString("alert.title_error", comment: "Error")
-    case .informational:
-      alert.messageText = NSLocalizedString("alert.title_info", comment: "Information")
-    case .warning:
-      alert.messageText = NSLocalizedString("alert.title_warning", comment: "Warning")
-    @unknown default:
-      assertionFailure("Unknown \(type(of: alertStyle)) \(alertStyle)")
-    }
-    alert.informativeText = message
-    alert.alertStyle = alertStyle
-    alert.runModal()
-  }
-
-  static func showAlert(_ key: String, comment: String? = nil, arguments: [CVarArg]? = nil, style: NSAlert.Style = .critical, sheetWindow: NSWindow? = nil, suppressionKey: PK? = nil) {
+  static func showAlert(_ key: String, comment: String? = nil, arguments: [CVarArg]? = nil, style: NSAlert.Style = .critical, sheetWindow: NSWindow? = nil, suppressionKey: PK? = nil, disableMenus: Bool = false) {
     let alert = NSAlert()
     if let suppressionKey = suppressionKey {
       // This alert includes a suppression button that allows the user to suppress the alert.
@@ -88,10 +70,21 @@ class Utility {
     }
 
     alert.alertStyle = style
+
+    // If an alert occurs early during startup when the first player core is being created then
+    // menus must be disabled while the alert is shown as opening certain menus will cause the menu
+    // controller to attempt to access the player core while it is being initialized resulting in a
+    // crash. See issue #5250.
+    if disableMenus {
+      AppDelegate.shared.menuController.disableAllMenus()
+    }
     if let sheetWindow = sheetWindow {
       alert.beginSheetModal(for: sheetWindow)
     } else {
       alert.runModal()
+    }
+    if disableMenus {
+      AppDelegate.shared.menuController.enableAllMenus()
     }
 
     // If the user asked for this alert to be suppressed set the associated preference.
@@ -495,10 +488,6 @@ class Utility {
                                                 attributes: FontAttributes(font: active ? .systemBold : .system, size: .system, align: .center).value)
   }
 
-  static func toRealSubScale(fromDisplaySubScale scale: Double) -> Double {
-    return scale > 0 ? scale : -1 / scale
-  }
-
   static func toDisplaySubScale(fromRealSubScale realScale: Double) -> Double {
     return realScale >= 1 ? realScale : -1 / realScale
   }
@@ -533,20 +522,6 @@ class Utility {
     }
   }
 
-  @available(macOS, deprecated: 10.14, message: "Use the system appearance-based APIs instead.")
-  static func getAppearanceAndMaterial(from theme: Preference.Theme) -> (NSAppearance?, NSVisualEffectView.Material) {
-    switch theme {
-    case .ultraDark:
-      return (NSAppearance(named: .vibrantDark), .ultraDark)
-    case .light:
-      return (NSAppearance(named: .vibrantLight), .light)
-    case .mediumLight:
-      return (NSAppearance(named: .vibrantLight), .mediumLight)
-    default:
-      return (NSAppearance(named: .vibrantDark), .dark)
-    }
-  }
-
   static func getLatestScreenshot(from path: String) -> URL? {
     let folder = URL(fileURLWithPath: NSString(string: path).expandingTildeInPath)
     guard let contents = try? FileManager.default.contentsOfDirectory(
@@ -557,7 +532,7 @@ class Utility {
     return contents.filter { $0.creationDate != nil }.max { $0.creationDate! < $1.creationDate! }
   }
 
-  /// Make sure the block is executed on the main thread. Be careful since it uses `sync`. Keep the block mininal.
+  /// Make sure the block is executed on the main thread. Be careful since it uses `sync`. Keep the block minimal.
   @discardableResult
   static func executeOnMainThread<T>(block: () -> T) -> T {
     if Thread.isMainThread {
@@ -568,6 +543,19 @@ class Utility {
       }
     }
   }
+
+  static func icon(for url: URL) -> NSImage {
+    if #available(macOS 11.0, *) {
+      if let uttype = UTType.types(tag: url.pathExtension, tagClass: .filenameExtension, conformingTo: nil).first {
+        return NSWorkspace.shared.icon(for: uttype)
+      } else {
+        return NSWorkspace.shared.icon(for: .data)
+      }
+    } else {
+      return NSWorkspace.shared.icon(forFileType: url.pathExtension)
+    }
+  }
+
 
   // MARK: - Util classes
 
@@ -670,12 +658,9 @@ class Utility {
   static func resolveURLs(_ urls: [URL]) -> [URL] {
     return urls.map { (try? URL(resolvingAliasFileAt: $0)) ?? $0 }
   }
-
 }
 
 // http://stackoverflow.com/questions/33294620/
-
-
 func rawPointerOf<T : AnyObject>(obj : T) -> UnsafeRawPointer {
   return UnsafeRawPointer(Unmanaged.passUnretained(obj).toOpaque())
 }

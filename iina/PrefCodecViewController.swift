@@ -20,7 +20,7 @@ class PrefCodecViewController: PreferenceViewController, PreferenceWindowEmbedda
   }
 
   var preferenceTabImage: NSImage {
-    return NSImage(named: NSImage.Name("pref_av"))!
+    return makeSymbol("play.rectangle.on.rectangle", fallbackImage: "pref_av")
   }
 
   override var sectionViews: [NSView] {
@@ -30,6 +30,8 @@ class PrefCodecViewController: PreferenceViewController, PreferenceWindowEmbedda
   @IBOutlet var sectionVideoView: NSView!
   @IBOutlet var sectionAudioView: NSView!
   @IBOutlet var sectionReplayGainView: NSView!
+  
+  @IBOutlet weak var audioDriverExperimentalIndicator: NSImageView!
 
   @IBOutlet weak var spdifAC3Btn: NSButton!
   @IBOutlet weak var spdifDTSBtn: NSButton!
@@ -47,10 +49,15 @@ class PrefCodecViewController: PreferenceViewController, PreferenceWindowEmbedda
     super.viewDidLoad()
     audioLangTokenField.commaSeparatedValues = Preference.string(for: .audioLanguage) ?? ""
     updateHwdecDescription()
+    updateToneMappingUI()
   }
 
   override func viewWillAppear() {
     super.viewWillAppear()
+    
+    if #available(macOS 14.0, *) {
+      audioDriverExperimentalIndicator.image = NSImage.findSFSymbol(["flask.fill"])
+    }
 
     audioDevicePopUp.removeAllItems()
     let audioDevices = PlayerCore.active.getAudioDevices()
@@ -104,6 +111,26 @@ class PrefCodecViewController: PreferenceViewController, PreferenceWindowEmbedda
     hwdecDescriptionTextField.stringValue = hwdec.localizedDescription
   }
 
+  // Prefs → UI
+  private func updateToneMappingUI() {
+    toneMappingTargetPeakTextField.integerValue = Preference.integer(for: .toneMappingTargetPeak)
+  }
+
+  @IBAction func toneMappingTargetPeakAction(_ sender: NSTextField) {
+    defer {
+      updateToneMappingUI()
+    }
+    let newValue = sender.integerValue
+    // constrain to valid mpv values
+    let isValueValid = newValue == 0 || (newValue >= 10 && newValue <= 10000)
+    guard isValueValid else {
+      Utility.showAlert("target_peak.bad_value", arguments: [String(newValue)], sheetWindow: view.window)
+      sender.integerValue = Preference.integer(for: .toneMappingTargetPeak)
+      return
+    }
+    Preference.set(newValue, for: .toneMappingTargetPeak)
+  }
+
   @IBAction func toneMappingHelpAction(_ sender: Any) {
     NSWorkspace.shared.open(URL(string: AppData.toneMappingHelpLink)!)
   }
@@ -118,5 +145,9 @@ class PrefCodecViewController: PreferenceViewController, PreferenceWindowEmbedda
 
   @IBAction func gainAdjustmentHelpAction(_ sender: Any) {
     NSWorkspace.shared.open(URL(string: AppData.gainAdjustmentHelpLink)!)
+  }
+
+  @IBAction func audioDriverHelpAction(_ sender: Any) {
+    NSWorkspace.shared.open(URL(string: AppData.audioDriverHellpLink)!)
   }
 }

@@ -16,6 +16,9 @@
 "general.username" = "Nome utente";
 "general.password" = "Password";
 
+"input.value_is_empty" = "Il campo non può essere vuoto.";
+"input.already_exists" = "Il valore esiste già.";
+
 // Guide Window
 "guide.highlights" = "In evidenza";
 "guide.basic_settings" = "Impostazioni di base";
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "Deinterlacciamento";
 "quicksetting.hdr" = "HDR";
 "quicksetting.hide" = "Nascondi";
+"quicksetting.reset_speed" = "Ripristina la velocità normale (1x)";
+
+// EQ Presets
+"eq.preset.flat" = "Azzerato";
+"eq.preset.acoustic" = "Acustica";
+"eq.preset.classical" = "Classica";
+"eq.preset.dance" = "Dance";
+"eq.preset.deep" = "Profondo";
+"eq.preset.electronic" = "Elettronica";
+"eq.preset.hip_hop" = "Hip-hop";
+"eq.preset.increase_bass" = "Bassi potenziati";
+"eq.preset.increase_treble" = "Alti potenziati";
+"eq.preset.increase_vocal" = "Voce in risalto";
+"eq.preset.jazz" = "Jazz";
+"eq.preset.latin" = "Latina";
+"eq.preset.loundness" = "Radio";
+"eq.preset.lounge" = "Lounge";
+"eq.preset.piano" = "Piano";
+"eq.preset.pop" = "Pop";
+"eq.preset.rnb" = "R&B";
+"eq.preset.reduce_bass" = "Bassi ridotti";
+"eq.preset.reduce_treble" = "Alti ridotti";
+"eq.preset.rock" = "Rock";
+"eq.preset.small_speaker" = "Casse acustiche mini";
+"eq.preset.spoken_word" = "Solo voce";
+
+"alert.eq.new_profile.title" = "Nuovo profilo";
+"alert.eq.new_profile.message" = "Scegli un nome per il profilo.";
+"alert.eq.rename.title" = "Rinomina il profilo corrente";
+"alert.eq.rename.message" = "Inserisci il nuovo nome per il profilo.";
 
 // OSDMessage.swift
 "osd.pause" = "Pausa";
 "osd.resume" = "Riprendi";
 "osd.volume" = "Volume: %i";
-"osd.speed" = "Velocità: %.2fx";
+"osd.speed" = "Velocità: %@x";
 "osd.aspect" = "Proporzioni: %@";
 "osd.crop" = "Ritaglio: %@";
 "osd.rotate" = "Rotazione: %i°";
@@ -129,10 +162,17 @@
 
 "preference.enable_adv_settings" = "Abilita impostazioni avanzate";
 
+"preference.sub_override_level.no" = "no";
 "preference.sub_override_level.force" = "force";
 "preference.sub_override_level.scale" = "scale";
 "preference.sub_override_level.strip" = "striscia";
 "preference.sub_override_level.yes" = "sì";
+
+"preference.sub_override_level.descriptive_text.no" = "Renderizza i sottotitoli come specificato dagli script, senza override.";
+"preference.sub_override_level.descriptive_text.force" = "Applica tutti gli stili dei sottotitoli.";
+"preference.sub_override_level.descriptive_text.scale" = "Imposta il fattore di scala dei sottotitoli (override).";
+"preference.sub_override_level.descriptive_text.strip" = "Rimuove tutti gli stili e i tag ASS dai sottotitoli.";
+"preference.sub_override_level.descriptive_text.yes" = "Regola le impostazioni degli stili.";
 
 "menu.volume" = "Volume: %d";
 "menu.volume_muted" = "Volume: %d (Spento)";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "Esci da Modalità Musica";
 "menu.pause" = "Pausa";
 "menu.resume" = "Riprendi";
-"menu.speed" = "Velocità: %.2fx";
+"menu.speed" = "Velocità: %@x";
 "menu.chapters" = "Pannello capitoli";
 "menu.hide_chapters" = "Nascondi pannello capitoli";
 "menu.playlist" = "Pannello playlist";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "Avanti %.0fs";
 "menu.seek_backward" = "Indietro %.0fs";
-"menu.speed_up" = "Più veloce del %.1fx";
-"menu.speed_down" = "Più lento del %.1fx";
+"menu.speed_up" = "Aumenta la velocità di %@x";
+"menu.speed_down" = "Riduci la velocità di %@x";
 "menu.volume_up" = "Volume + %.0f%%";
 "menu.volume_down" = "Volume - %.0f%%";
 "menu.audio_delay_up" = "Ritarda audio + %.1fs";
@@ -204,6 +244,8 @@
 "alert.error_loading_script" = "Impossibile caricare lo script %@!";
 "alert.error_saving_file" = "Si è verificato un errore durante il salvataggio %@: %@";
 "alert.error_deleting_file" = "Impossibile eliminare il file.";
+
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
 
 "alert.config.new.title" = "Nuova configurazione di input";
 "alert.config.new.message" = "Inserisci un nome per la nuova configurazione.";

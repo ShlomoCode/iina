@@ -215,7 +215,7 @@ class HistoryWindowController: NSWindowController, NSOutlineViewDelegate, NSOutl
         let fileExists = !entry.url.isFileURL || FileManager.default.fileExists(atPath: entry.url.path)
         filenameView.textField?.stringValue = entry.url.isFileURL ? entry.name : entry.url.absoluteString
         filenameView.textField?.textColor = fileExists ? .controlTextColor : .disabledControlTextColor
-        filenameView.docImage.image = NSWorkspace.shared.icon(forFileType: entry.url.pathExtension)
+        filenameView.docImage.image = Utility.icon(for: entry.url)
       } else if identifier == .progress {
         // Progress cell
         let progressView = cell as! HistoryProgressCellView
@@ -253,10 +253,12 @@ class HistoryWindowController: NSWindowController, NSOutlineViewDelegate, NSOutl
       reloadData()
       return
     }
-    let newObjects = HistoryController.shared.history.filter { entry in
-      let string = searchOption == .filename ? entry.name : entry.url.path
-      // Do a locale-aware, case and diacritic insensitive search:
-      return string.localizedStandardContains(searchString)
+    let newObjects = HistoryController.shared.$history.withLock {
+      $0.filter { entry in
+        let string = searchOption == .filename ? entry.name : entry.url.path
+        // Do a locale-aware, case and diacritic insensitive search:
+        return string.localizedStandardContains(searchString)
+      }
     }
     prepareData(fromHistory: newObjects)
     outlineView.reloadData()

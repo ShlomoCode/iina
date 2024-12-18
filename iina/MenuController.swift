@@ -287,11 +287,7 @@ class MenuController: NSObject, NSMenuDelegate {
 
     // -- screen
     fullScreen.action = #selector(MainWindowController.menuToggleFullScreen(_:))
-    if #available(macOS 10.12, *) {
-      pictureInPicture.action = #selector(MainWindowController.menuTogglePIP(_:))
-    } else {
-      videoMenu.removeItem(pictureInPicture)
-    }
+    pictureInPicture.action = #selector(MainWindowController.menuTogglePIP(_:))
     alwaysOnTop.action = #selector(MainWindowController.menuAlwaysOnTop(_:))
 
     // -- aspect
@@ -418,11 +414,7 @@ class MenuController: NSObject, NSMenuDelegate {
 
     // Window
 
-    if #available(macOS 10.12.2, *) {
-      customTouchBar.action = #selector(NSApplication.toggleTouchBarCustomizationPalette(_:))
-    } else {
-      customTouchBar.isHidden = true
-    }
+    customTouchBar.action = #selector(NSApplication.toggleTouchBarCustomizationPalette(_:))
 
     inspector.action = #selector(MainMenuActionHandler.menuShowInspector(_:))
     miniPlayer.action = #selector(MainWindowController.menuSwitchToMiniPlayer(_:))
@@ -439,9 +431,11 @@ class MenuController: NSObject, NSMenuDelegate {
 
   private func updatePlaylist() {
     playlistMenu.removeAllItems()
-    for (index, item) in PlayerCore.active.info.playlist.enumerated() {
-      playlistMenu.addItem(withTitle: item.filenameForDisplay, action: #selector(MainMenuActionHandler.menuPlaylistItem(_:)),
-                           tag: index, obj: nil, stateOn: item.isCurrent)
+    PlayerCore.active.info.$playlist.withLock { playlist in
+      for (index, item) in playlist.enumerated() {
+        playlistMenu.addItem(withTitle: item.filenameForDisplay, action: #selector(MainMenuActionHandler.menuPlaylistItem(_:)),
+                             tag: index, obj: nil, stateOn: item.isCurrent)
+      }
     }
   }
 
@@ -495,7 +489,8 @@ class MenuController: NSObject, NSMenuDelegate {
     let loopMode = player.getLoopMode()
     fileLoop.state = loopMode == .file ? .on : .off
     playlistLoop.state = loopMode == .playlist ? .on : .off
-    speedIndicator.title = String(format: NSLocalizedString("menu.speed", comment: "Speed:"), player.info.playSpeed)
+    let speed = player.info.playSpeed.string
+    speedIndicator.title = String(format: NSLocalizedString("menu.speed", comment: "Speed:"), speed)
   }
 
   private func updateVideoMenu() {
@@ -593,12 +588,14 @@ class MenuController: NSObject, NSMenuDelegate {
   }
 
   func updatePluginMenu() {
+    let isDisplayingPluginsPanel = PlayerCore.active.mainWindow.sideBarStatus == .plugins
     pluginMenu.removeAllItems()
-    pluginMenu.addItem(withTitle: "Manage Plugins…")
+    pluginMenu.addItem(withTitle: Constants.String.managePlugins, action: #selector(AppDelegate.showPluginPreferences(_:)), keyEquivalent: "")
+    pluginMenu.addItem(withTitle: isDisplayingPluginsPanel ? Constants.String.hidePluginsPanel : Constants.String.showPluginsPanel, action: #selector(MainMenuActionHandler.showPluginsPanel(_:)), keyEquivalent: "")
     pluginMenu.addItem(.separator())
 
     let developerTool = NSMenuItem()
-    developerTool.title = "Developer Tool"
+    developerTool.title = NSLocalizedString("menu.developer_tool", comment: "Developer Tool")
     developerTool.submenu = NSMenu()
 
     var errorList: [(String, String)] = []
@@ -611,14 +608,19 @@ class MenuController: NSObject, NSMenuDelegate {
       if index != 0 {
         pluginMenu.addItem(.separator())
       }
-      pluginMenu.addItem(withTitle: instance.plugin.name, enabled: false)
-      
+
+      if #available(macOS 14.0, *) {
+        pluginMenu.addItem(.sectionHeader(title: instance.plugin.name))
+      } else {
+        pluginMenu.addItem(withTitle: instance.plugin.name, enabled: false)
+      }
+
       for item in menuItems {
         if counter == 5 {
           Logger.log("Please avoid adding too much first-level menu items. IINA will only display the first 5 of them.",
                      level: .warning, subsystem: instance.subsystem)
           let moreItem = NSMenuItem()
-          moreItem.title = "More…"
+          moreItem.title = NSLocalizedString("menu.more_plugin", comment: "More…")
           rootMenu = NSMenu()
           moreItem.submenu = rootMenu
           pluginMenu.addItem(moreItem)
@@ -640,16 +642,18 @@ class MenuController: NSObject, NSMenuDelegate {
     }
 
     if errorList.count > 0 {
-      pluginMenu.insertItem(
-        NSMenuItem(title: "⚠︎ Conflicting key shortcuts…", action: nil, keyEquivalent: ""),
-        at: 0)
+      let item = NSMenuItem(title: NSLocalizedString("menu.conflicting_shortcuts", comment: "Conflicting key shortcuts…"), action: nil, keyEquivalent: "")
+      if #available(macOS 14.0, *) {
+        item.badge = NSMenuItemBadge.alerts(count: errorList.count)
+      }
+      pluginMenu.insertItem(item, at: 0)
     }
 
     pluginMenu.addItem(.separator())
     if #available(macOS 12.0, *) {
       pluginMenu.addItem(developerTool)
     }
-    pluginMenu.addItem(withTitle: "Reload all plugins", action: #selector(MainMenuActionHandler.reloadAllPlugins(_:)), keyEquivalent: "")
+    pluginMenu.addItem(withTitle: NSLocalizedString("menu.reload_plugins", comment: "Reload All Plugins"), action: #selector(MainMenuActionHandler.reloadAllPlugins(_:)), keyEquivalent: "")
   }
 
   @discardableResult
@@ -827,7 +831,7 @@ class MenuController: NSObject, NSMenuDelegate {
   }
 
   func updateKeyEquivalentsFrom(_ keyBindings: [KeyMapping]) {
-    var settings: [(NSMenuItem, Bool, [String], Bool, ClosedRange<Double>?, String?)] = [
+    let settings: [(NSMenuItem, Bool, [String], Bool, ClosedRange<Double>?, String?)] = [
       (showCurrentFileInFinder, true, [IINACommand.showCurrentFileInFinder.rawValue], false, nil, nil),
       (deleteCurrentFile, true, [IINACommand.deleteCurrentFile.rawValue], false, nil, nil),
       (savePlaylist, true, [IINACommand.saveCurrentPlaylist.rawValue], false, nil, nil),
@@ -844,6 +848,7 @@ class MenuController: NSObject, NSMenuDelegate {
       (smallerSize, true, [IINACommand.smallerWindow.rawValue], false, nil, nil),
       (fitToScreen, true, [IINACommand.fitToScreen.rawValue], false, nil, nil),
       (miniPlayer, true, [IINACommand.toggleMusicMode.rawValue], false, nil, nil),
+      (pictureInPicture, true, [IINACommand.togglePIP.rawValue], false, nil, nil),
       (cycleVideoTracks, false, ["cycle", "video"], false, nil, nil),
       (cycleAudioTracks, false, ["cycle", "audio"], false, nil, nil),
       (cycleSubtitles, false, ["cycle", "sub"], false, nil, nil),
@@ -891,12 +896,8 @@ class MenuController: NSObject, NSMenuDelegate {
       (decreaseTextSize, false, ["multiply", "sub-scale", "0.9"], true, 0.71...0.99, nil),
       (resetTextSize, false, ["set", "sub-scale", "1"], true, nil, nil),
       (alwaysOnTop, false, ["cycle", "ontop"], false, nil, nil),
-      (fullScreen, false, ["cycle", "fullscreen"], false, nil, nil)
+      (fullScreen, false, ["cycle", "fullscreen"], false, nil, nil),
     ]
-
-    if #available(macOS 10.12, *) {
-      settings.append((pictureInPicture, true, [IINACommand.togglePIP.rawValue], false, nil, nil))
-    }
 
     var otherActionsMenuItems: [NSMenuItem] = []
 
@@ -945,7 +946,17 @@ class MenuController: NSObject, NSMenuDelegate {
     menuItem.keyEquivalentModifierMask = kMdf
 
     if let value = value, let l10nKey = l10nKey {
-      menuItem.title = String(format: NSLocalizedString("menu." + l10nKey, comment: ""), abs(value))
+      let valObj: CVarArg
+      switch l10nKey {
+      case "speed_up",
+        "speed_down":
+        // Title format expects arg type: String
+        valObj = abs(value).string
+      default:
+        // Title format expects numeric arg
+        valObj = abs(value)
+      }
+      menuItem.title = String(format: NSLocalizedString("menu." + l10nKey, comment: ""), valObj)
       if let extraData = extraData {
         menuItem.representedObject = (value, extraData)
       } else {
@@ -959,22 +970,28 @@ class MenuController: NSObject, NSMenuDelegate {
 
   /// Disable all menu items.
   ///
-  /// This method is used during application termination to stop any further input from the user.
+  /// This method is used during application termination to stop any further input from the user and when displaying alerts.
   func disableAllMenus() {
     isDisabled = true
-    disableAllMenuItems(NSApp.mainMenu!)
+    setIsEnabledInAllMenuItems(NSApp.mainMenu!, false)
   }
 
-  /// Disable all menu items in the given menu and any submenus.
+  func enableAllMenus() {
+    isDisabled = false
+    setIsEnabledInAllMenuItems(NSApp.mainMenu!, true)
+  }
+
+  /// Set `isEnabled` to the given value in all menu items in the given menu and any submenus.
   ///
-  /// This method recursively descends through the entire tree of menu items disabling all items.
-  /// - Parameter menu: Menu to disable
-  private func disableAllMenuItems(_ menu: NSMenu) {
+  /// This method recursively descends through the entire tree of menu items setting `isEnabled` in all items.
+  /// - Parameter menu: Menu to disable or enable.
+  /// - Parameter value: Value to set `isEnabled` to.
+  private func setIsEnabledInAllMenuItems(_ menu: NSMenu, _ value: Bool) {
     for item in menu.items {
       if item.hasSubmenu {
-        disableAllMenuItems(item.submenu!)
+        setIsEnabledInAllMenuItems(item.submenu!, value)
       }
-      item.isEnabled = false
+      item.isEnabled = value
     }
   }
 }

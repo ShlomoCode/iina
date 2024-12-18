@@ -16,6 +16,9 @@
 "general.username" = "Benutzername";
 "general.password" = "Passwort";
 
+"input.value_is_empty" = "Wert darf nicht leer sein.";
+"input.already_exists" = "Wert ist bereits vorhanden.";
+
 // Guide Window
 "guide.highlights" = "Highlights";
 "guide.basic_settings" = "Allgemeine Einstellungen";
@@ -24,7 +27,7 @@
 // Initial Window
 "initial.announcement" = "Du benutzt Version %@ von IINA";
 "initial.beta.desc" = "Wenn du eine Release Version benutzen willst, entferne den Haken bei „Betaupdates erhalten“ in Einstellungen -> Allgemein und installiere eine stabile Version von unserer <a href=\"https://iina.io\">offiziellen Webseite</a>.";
-"initial.nightly.desc" = "Nightly Versionen sollten nicht für den täglichen Gebrauch eingesetzt werden. Aktuell unterstützen diese keine Auto Updates. Bitte lade neuere Versionen von <a href=\"https://nightly.iina.io\">Nightly Website</a>.";
+"initial.nightly.desc" = "Nightly is not recommended to be used as your daily driver. Currently nightly builds do not support auto update. Please manually download newer builds from our <a href=\"https://nightly.iina.io\">nightly website</a>.";
 "initial.debug.desc" = "Debug-Builds sind normalerweise nicht auf Leistung optimiert, daher wird es nicht empfohlen diese für den täglichen Gebrauch einzusetzen. Debug-Builds unterstützen keine automatischen Updates.";
 "initial.bug_report" = "Melde via <a href=\"https://github.com/iina/iina/issues\">GitHub Tickets</a>.";
 
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "Deinterlacing";
 "quicksetting.hdr" = "HDR";
 "quicksetting.hide" = "Verstecken";
+"quicksetting.reset_speed" = "Reset speed to 1x";
+
+// EQ Presets
+"eq.preset.flat" = "Flat";
+"eq.preset.acoustic" = "Akustisch";
+"eq.preset.classical" = "Klassik";
+"eq.preset.dance" = "Dance";
+"eq.preset.deep" = "Deep";
+"eq.preset.electronic" = "Electronic";
+"eq.preset.hip_hop" = "Hip-Hop";
+"eq.preset.increase_bass" = "Bass erhöhen";
+"eq.preset.increase_treble" = "Höhen anheben";
+"eq.preset.increase_vocal" = "Vocal erhöhen";
+"eq.preset.jazz" = "Jazz";
+"eq.preset.latin" = "Latin";
+"eq.preset.loundness" = "Lautheit";
+"eq.preset.lounge" = "Lounge";
+"eq.preset.piano" = "Piano";
+"eq.preset.pop" = "Pop";
+"eq.preset.rnb" = "R&B";
+"eq.preset.reduce_bass" = "Bass reduzieren";
+"eq.preset.reduce_treble" = "Höhen reduzieren";
+"eq.preset.rock" = "Rock";
+"eq.preset.small_speaker" = "Kleiner Lautsprecher";
+"eq.preset.spoken_word" = "Gesprochenes Wort";
+
+"alert.eq.new_profile.title" = "Neues EQ-Profil";
+"alert.eq.new_profile.message" = "Bitte einen Profilnamen eingeben.";
+"alert.eq.rename.title" = "Aktuelles Profil umbenennen";
+"alert.eq.rename.message" = "Bitte einen neuen Profilnamen eingeben.";
 
 // OSDMessage.swift
 "osd.pause" = "Pausieren";
 "osd.resume" = "Wiedergabe";
 "osd.volume" = "Lautstärke: %i";
-"osd.speed" = "Geschwindigkeit: %.2fx";
+"osd.speed" = "Speed: %@x";
 "osd.aspect" = "Seitenverhältnis: %@";
 "osd.crop" = "Zuschneiden: %@";
 "osd.rotate" = "Drehung: %i°";
@@ -65,14 +98,14 @@
 "osd.sub_delay.later" = "Untertitelverzögerung: %.2f s später";
 "osd.sub_delay.earlier" = "Untertitelverzögerung: %.2f s früher";
 "osd.subtitle_pos" = "Untertitelposition: %.1f";
-"osd.sub_hidden" = "Subtitles Hidden";
-"osd.sub_visible" = "Subtitles Visible";
-"osd.sub_second_delay.nodelay" = "Secondary Subtitle Delay: No Delay";
-"osd.sub_second_delay.later" = "Secondary Subtitle Delay: %.2fs Later";
-"osd.sub_second_delay.earlier" = "Secondary Subtitle Delay: %.2fs Earlier";
-"osd.sub_second_hidden" = "Secondary Subtitles Hidden";
-"osd.sub_second_pos" = "Secondary Subtitle Position: %.1f";
-"osd.sub_second_visible" = "Secondary Subtitles Visible";
+"osd.sub_hidden" = "Untertitel ausgeblendet";
+"osd.sub_visible" = "Untertitel sichtbar";
+"osd.sub_second_delay.nodelay" = "Verzögerung des zweiten Untertitels: Keine Verzögerung";
+"osd.sub_second_delay.later" = "Verzögerung des zweiten Untertitels: %.2fs später";
+"osd.sub_second_delay.earlier" = "Verzögerung des zweiten Untertitels: %.2fs früher";
+"osd.sub_second_hidden" = "Zweite Untertitel ausgeblendet";
+"osd.sub_second_pos" = "Position des zweiten Untertitels: %.1f";
+"osd.sub_second_visible" = "Zweite Untertitel sichtbar";
 "osd.mute" = "Stumm";
 "osd.unmute" = "Ton ein";
 "osd.screenshot" = "Bildschirmfoto aufgenommen";
@@ -92,8 +125,8 @@
 "osd.find_online_sub" = "Online nach Untertiteln suchen …";
 "osd.find_online_sub.source" = "Quelle:";
 "osd.sub_not_found" = "Keine Untertitel gefunden";
-"osd.sub_found" = "%d subtitles found.";
-"osd.sub_downloading" = "Downloading %d subtitles";
+"osd.sub_found" = "%d Untertitel gefunden.";
+"osd.sub_downloading" = "%d Untertitel werden heruntergeladen";
 "osd.sub_downloaded" = "Untertitel geladen";
 "osd.sub_saved" = "Untertitel gesichert";
 "osd.network_error" = "Netzwerkfehler";
@@ -129,19 +162,26 @@
 
 "preference.enable_adv_settings" = "Erweiterte Einstellungen";
 
+"preference.sub_override_level.no" = "no";
 "preference.sub_override_level.force" = "force";
 "preference.sub_override_level.scale" = "scale";
 "preference.sub_override_level.strip" = "strip";
-"preference.sub_override_level.yes" = "yes";
+"preference.sub_override_level.yes" = "ja";
+
+"preference.sub_override_level.descriptive_text.no" = "Render subtitles as specified by the subtitle scripts, without overrides.";
+"preference.sub_override_level.descriptive_text.force" = "Apply all subtitle styles.";
+"preference.sub_override_level.descriptive_text.scale" = "Apply the scale setting in addition to the style settings in this section.";
+"preference.sub_override_level.descriptive_text.strip" = "Radically strip all ASS tags and styles from the subtitle.";
+"preference.sub_override_level.descriptive_text.yes" = "Apply all the style settings in this section.";
 
 "menu.volume" = "Lautstärke: %d";
 "menu.volume_muted" = "Lautstärke: %d (Stumm)";
 "menu.audio_delay" = "Audioverzögerung: %.2f s";
 "menu.sub_delay" = "Untertitelverzögerung: %.2f s";
-"menu.sub_hide" = "Hide Subtitles";
-"menu.sub_show" = "Show Subtitles";
-"menu.sub_second_hide" = "Hide Secondary Subtitles";
-"menu.sub_second_show" = "Show Secondary Subtitles";
+"menu.sub_hide" = "Untertitel ausblenden";
+"menu.sub_show" = "Untertitel anzeigen";
+"menu.sub_second_hide" = "Zweite Untertitel ausblenden";
+"menu.sub_second_show" = "Zweite Untertitel anzeigen";
 "menu.fullscreen" = "Vollbildmodus";
 "menu.exit_fullscreen" = "Vollbildmodus beenden";
 "menu.pip" = "Bild-in-Bild öffnen";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "Musikmodus beenden";
 "menu.pause" = "Pausieren";
 "menu.resume" = "Wiedergabe";
-"menu.speed" = "Geschwindigkeit: %.2fx";
+"menu.speed" = "Speed: %@x";
 "menu.chapters" = "Kapitel anzeigen";
 "menu.hide_chapters" = "Kapitel verbergen";
 "menu.playlist" = "Wiedergabeliste anzeigen";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "%.0f s vorspulen";
 "menu.seek_backward" = "%.0f s zurückspulen";
-"menu.speed_up" = "Beschleunigen auf %.1fx";
-"menu.speed_down" = "Verlangsamen auf %.1fx";
+"menu.speed_up" = "Speed Up by %@x";
+"menu.speed_down" = "Speed Down by %@x";
 "menu.volume_up" = "Lautstärke + %.0f%%";
 "menu.volume_down" = "Lautstärke − %.0f%%";
 "menu.audio_delay_up" = "Audioverzögerung + %.1f s";
@@ -205,17 +245,19 @@
 "alert.error_saving_file" = "Fehler beim Sichern von %@: %@";
 "alert.error_deleting_file" = "Datei konnte nicht gelöscht werden.";
 
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
+
 "alert.config.new.title" = "Neue Eingabekonfiguration";
 "alert.config.new.message" = "Bitte gib einen Namen für die neue Konfiguration ein.";
 "alert.config.duplicate.title" = "Konfiguration duplizieren";
 "alert.config.duplicate.message" = "Bitte gib einen Namen für die duplizierte Konfiguration ein.";
 "alert.config.empty_name" = "Der Name darf nicht leer sein.";
-"alert.config.name_existing" = "A config with the same name already exists.";
+"alert.config.name_existing" = "Es existiert bereits eine Konfiguration mit demselben Namen.";
 "alert.config.file_existing.title" = "Die Datei existiert bereits.";
-"alert.config.file_existing.message" = "A config file with the same filename already exists. Choose OK to show the file in Finder.";
+"alert.config.file_existing.message" = "Eine Konfigurationsdatei mit demselben Dateinamen existiert bereits. OK auswählen, um die Datei im Finder anzuzeigen.";
 "alert.config.cannot_create" = "Konfigurationsdatei konnte nicht erstellt werden.\n%@";
 "alert.config.cannot_write" = "Konfigurationsdatei nicht beschreibbar.";
-"alert.config.rename.title" = "Rename Input Configuration";
+"alert.config.rename.title" = "Eingabekonfiguration umbenennen";
 "alert.config.rename.message" = "Please enter the new name for the configuration.";
 
 "alert.filter.incorrect" = "Fehler beim Setzen der Filter. Bitte überprüfe die Parameter.";

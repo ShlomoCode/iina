@@ -48,6 +48,10 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
   internal lazy var verticalScrollAction: Preference.ScrollAction = Preference.enum(for: .verticalScrollAction)
   
   internal var observedPrefKeys: [Preference.Key] = [
+    .enableToneMapping,
+    .toneMappingTargetPeak,
+    .loadIccProfile,
+    .toneMappingAlgorithm,
     .themeMaterial,
     .showRemainingTime,
     .alwaysFloatOnTop,
@@ -68,6 +72,11 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
     guard let keyPath = keyPath, let change = change else { return }
     
     switch keyPath {
+    case PK.enableToneMapping.rawValue,
+      PK.toneMappingTargetPeak.rawValue,
+      PK.loadIccProfile.rawValue,
+      PK.toneMappingAlgorithm.rawValue:
+      videoView.refreshEdrMode()
     case PK.themeMaterial.rawValue:
       if let newValue = change[.newKey] as? Int {
         setMaterial(Preference.Theme(rawValue: newValue))
@@ -155,7 +164,13 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
 
   internal var mouseActionDisabledViews: [NSView?] {[]}
 
-  // MARK: - Initiaization
+  /** This variable is true when the window ready to show but waiting for size from mpv.
+   In the `notifyWindowVideoSizeChanged()` call, this variable will be checked and the
+   window will be shown if this variable is true.
+   */
+  internal var pendingShow = false
+
+  // MARK: - Initialization
 
   override func windowDidLoad() {
     super.windowDidLoad()
@@ -217,10 +232,7 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
   internal func setMaterial(_ theme: Preference.Theme?) {
     guard let window = window, let theme = theme else { return }
 
-    if #available(macOS 10.14, *) {
-      window.appearance = NSAppearance(iinaTheme: theme)
-    }
-    // See overridden functions for 10.14-
+    window.appearance = NSAppearance(iinaTheme: theme)
   }
 
   // MARK: - Mouse / Trackpad events
@@ -513,20 +525,11 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
     performMouseAction(action)
   }
   
-  // MARK: - Window delegate: Open / Close
-  
-  func windowDidOpen() {
-    if Preference.bool(for: .alwaysFloatOnTop) {
-      setWindowFloatingOnTop(true)
-    }
-    videoView.startDisplayLink()
-  }
-  
   // MARK: - Window delegate: Activeness status
 
   func windowDidBecomeMain(_ notification: Notification) {
     PlayerCore.lastActive = player
-    if #available(macOS 10.13, *), RemoteCommandController.useSystemMediaControl {
+    if RemoteCommandController.useSystemMediaControl {
       NowPlayingInfoManager.updateInfo(withTitle: true)
     }
     AppDelegate.shared.menuController?.updatePluginMenu()
@@ -543,7 +546,7 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
   }
 
   // MARK: - UI
-  
+
   func setupUI() {
     player.syncUI([.time, .playButton, .volume])
   }
@@ -591,21 +594,17 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
       return
     }
     [leftLabel, rightLabel].forEach { $0.updateText(with: duration, given: pos) }
-    if #available(macOS 10.12.2, *) {
-      player.touchBarSupport.touchBarPosLabels.forEach { $0.updateText(with: duration, given: pos) }
-    }
+    player.touchBarSupport.touchBarPosLabels.forEach { $0.updateText(with: duration, given: pos) }
     if andProgressBar {
       let percentage = (pos.second / duration.second) * 100
       playSlider.doubleValue = percentage
-      if #available(macOS 10.12.2, *) {
-        player.touchBarSupport.touchBarPlaySlider?.setDoubleValueSafely(percentage)
-      }
+      player.touchBarSupport.touchBarPlaySlider?.setDoubleValueSafely(percentage)
     }
   }
   
-  func updatePlayButtonState(_ state: NSControl.StateValue) {
+  func updatePlayButtonState(paused: Bool) {
     guard loaded else { return }
-    playButton.state = state
+    playButton.image = NSImage(named: paused ? "play" : "pause")
   }
 
   /** This method will not set `isOntop`! */
@@ -615,6 +614,10 @@ class PlayerWindowController: NSWindowController, NSWindowDelegate {
     if (updateOnTopStatus) {
       self.isOntop = onTop
     }
+  }
+
+  func handleVideoSizeChange() {
+    fatalError("Must implement in the subclass")
   }
 
   // MARK: - IBActions

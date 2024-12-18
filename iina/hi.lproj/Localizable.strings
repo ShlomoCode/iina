@@ -16,6 +16,9 @@
 "general.username" = "उपयोगकर्ता नाम";
 "general.password" = "पारण शब्द";
 
+"input.value_is_empty" = "Value cannot be empty.";
+"input.already_exists" = "Value already exists.";
+
 // Guide Window
 "guide.highlights" = "Highlights";
 "guide.basic_settings" = "मार्गदर्शक. मूल_सेटिंग्स";
@@ -24,7 +27,7 @@
 // Initial Window
 "initial.announcement" = "You are using a %@ version of IINA";
 "initial.beta.desc" = "If you want to rollback to a release version, uncheck \"receive beta updates\" from Settings > General, and install a stable release from our <a href=\"https://iina.io\">official website</a>.";
-"initial.nightly.desc" = "Nightly is not recommended to be used as daily drive. Currently nightly builds do not support auto update. Please manually download newer builds from our <a href=\"https://nightly.iina.io\">nightly website</a>.";
+"initial.nightly.desc" = "Nightly is not recommended to be used as your daily driver. Currently nightly builds do not support auto update. Please manually download newer builds from our <a href=\"https://nightly.iina.io\">nightly website</a>.";
 "initial.debug.desc" = "Debug builds are usually not optimized for performance, so it is not recommended to be used as daily drive. Debug builds do not support auto update.";
 "initial.bug_report" = "Report via <a href=\"https://github.com/iina/iina/issues\">GitHub issues</a>.";
 
@@ -47,12 +50,42 @@
 "quicksetting.deinterlace" = "असंग्रथित";
 "quicksetting.hdr" = "HDR";
 "quicksetting.hide" = "छिपाना";
+"quicksetting.reset_speed" = "Reset speed to 1x";
+
+// EQ Presets
+"eq.preset.flat" = "Flat";
+"eq.preset.acoustic" = "Acoustic";
+"eq.preset.classical" = "Classical";
+"eq.preset.dance" = "Dance";
+"eq.preset.deep" = "Deep";
+"eq.preset.electronic" = "Electronic";
+"eq.preset.hip_hop" = "Hip Hop";
+"eq.preset.increase_bass" = "Increase Bass";
+"eq.preset.increase_treble" = "Increase Treble";
+"eq.preset.increase_vocal" = "Increase Vocal";
+"eq.preset.jazz" = "Jazz";
+"eq.preset.latin" = "Latin";
+"eq.preset.loundness" = "Loundness";
+"eq.preset.lounge" = "Lounge";
+"eq.preset.piano" = "Piano";
+"eq.preset.pop" = "Pop";
+"eq.preset.rnb" = "R&B";
+"eq.preset.reduce_bass" = "Reduce Bass";
+"eq.preset.reduce_treble" = "Reduce Treble";
+"eq.preset.rock" = "Rock";
+"eq.preset.small_speaker" = "Small Speaker";
+"eq.preset.spoken_word" = "Spoken Word";
+
+"alert.eq.new_profile.title" = "New EQ Profile";
+"alert.eq.new_profile.message" = "Please enter a profile name.";
+"alert.eq.rename.title" = "Rename Currnet Profile";
+"alert.eq.rename.message" = "Please enter a new profile name.";
 
 // OSDMessage.swift
 "osd.pause" = "रोकें";
 "osd.resume" = "पुनः आरंभ";
 "osd.volume" = "ध्वनि: %i";
-"osd.speed" = "गति: %.2fx";
+"osd.speed" = "Speed: %@x";
 "osd.aspect" = "आस्पेक्ट अनुपात: %@";
 "osd.crop" = "क्रॉप: %@";
 "osd.rotate" = "घुमाएँ: %i°";
@@ -129,10 +162,17 @@
 
 "preference.enable_adv_settings" = "उन्नत सेटिंग्स सक्षम करें";
 
+"preference.sub_override_level.no" = "no";
 "preference.sub_override_level.force" = "force";
 "preference.sub_override_level.scale" = "scale";
 "preference.sub_override_level.strip" = "स्ट्रिप";
 "preference.sub_override_level.yes" = "yes";
+
+"preference.sub_override_level.descriptive_text.no" = "Render subtitles as specified by the subtitle scripts, without overrides.";
+"preference.sub_override_level.descriptive_text.force" = "Apply all subtitle styles.";
+"preference.sub_override_level.descriptive_text.scale" = "Apply the scale setting in addition to the style settings in this section.";
+"preference.sub_override_level.descriptive_text.strip" = "Radically strip all ASS tags and styles from the subtitle.";
+"preference.sub_override_level.descriptive_text.yes" = "Apply all the style settings in this section.";
 
 "menu.volume" = "ध्वनि: %d";
 "menu.volume_muted" = "Volume: %d (Muted)";
@@ -150,7 +190,7 @@
 "menu.exit_mini_player" = "Exit Music Mode";
 "menu.pause" = "रोकें";
 "menu.resume" = "पुनः आरंभ";
-"menu.speed" = "गति: %.2fx";
+"menu.speed" = "Speed: %@x";
 "menu.chapters" = "अध्याय पैनल दिखाएं";
 "menu.hide_chapters" = "Hide Chapters Panel";
 "menu.playlist" = "प्लेलिस्ट पैनल दिखाएं";
@@ -164,8 +204,8 @@
 
 "menu.seek_forward" = "आगे कदम %.0fs";
 "menu.seek_backward" = "पीछे जाओ %.0fs";
-"menu.speed_up" = "%.1fx तक स्पीड";
-"menu.speed_down" = "गति %.1fx करने के लिए नीचे";
+"menu.speed_up" = "Speed Up by %@x";
+"menu.speed_down" = "Speed Down by %@x";
 "menu.volume_up" = "ध्वनि + %.0f%%";
 "menu.volume_down" = "ध्वनि - %.0f%%";
 "menu.audio_delay_up" = "ऑडियो विलंब + %.1fs";
@@ -204,6 +244,8 @@
 "alert.error_loading_script" = "स्क्रिप्ट %@! लोड नहीं किया जा सकता";
 "alert.error_saving_file" = "%@: %@ को सहेजते समय त्रुटि आई\n";
 "alert.error_deleting_file" = "फ़ाइल को हटा नहीं सकता।";
+
+"alert.target_peak.bad_value" = "The value \"%@\" is invalid.\nPlease provide a value betwen 10 and 10000, or 0.";
 
 "alert.config.new.title" = "नया इनपुट कॉन्फ़िगरेशन";
 "alert.config.new.message" = "कृपया नए कॉन्फ़िगरेशन के लिए एक नाम दर्ज करें।";

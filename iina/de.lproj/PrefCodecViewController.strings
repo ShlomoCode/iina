@@ -92,7 +92,7 @@
 "ZRL-b0-k1L.title" = "Gain adjustment:";
 
 /* Class = "NSMenuItem"; title = "No adjustment"; ObjectID = "k7b-6o-lCK"; */
-"k7b-6o-lCK.title" = "No adjustment";
+"k7b-6o-lCK.title" = "Keine Anpassung";
 
 /* Class = "NSMenuItem"; title = "Track gain"; ObjectID = "w6E-lw-g7g"; */
 "w6E-lw-g7g.title" = "Track gain";
@@ -119,10 +119,16 @@
 "HQV-tY-NMj.title" = "If this option is not enabled, clipping will be prevented by lowering the gain.";
 
 /* Class = "NSTextFieldCell"; title = "Fallback:"; ObjectID = "fOz-6g-MhS"; */
-"fOz-6g-MhS.title" = "Fallback:";
+"fOz-6g-MhS.title" = "Reservesystem:";
 
 /* Class = "NSTextFieldCell"; title = "dB"; ObjectID = "ovT-D3-3jS"; */
 "ovT-D3-3jS.title" = "dB";
 
 /* Class = "NSTextFieldCell"; title = "Gain to apply if the file has no ReplayGain tags."; ObjectID = "m2n-yd-a4n"; */
 "m2n-yd-a4n.title" = "Gain to apply if the file has no ReplayGain tags.";
+
+/* Class = "NSTextFieldCell"; title = "Audio driver:"; ObjectID = "Zco-Ba-Idk"; */
+"Zco-Ba-Idk.title" = "Audio driver:";
+
+/* Class = "NSTextFieldCell"; title = "AVFoundation is a new, experimental audio driver offering Spatial Audio support. However, you may encounter some issues when using AVFoundation, such as audio delays."; ObjectID = "2Md-pv-gSi"; */
+"2Md-pv-gSi.title" = "AVFoundation is a new, experimental audio driver offering Spatial Audio support. However, you may encounter some issues when using AVFoundation, such as audio delays.";

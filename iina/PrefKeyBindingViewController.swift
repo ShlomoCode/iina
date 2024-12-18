@@ -12,7 +12,7 @@ fileprivate let fm = FileManager.default
 fileprivate typealias KC = PrefKeyBindingViewController
 
 @objcMembers
-class PrefKeyBindingViewController: NSViewController, PreferenceWindowEmbeddable {
+class PrefKeyBindingViewController: PreferenceViewController, PreferenceWindowEmbeddable {
 
   override var nibName: NSNib.Name {
     return NSNib.Name("PrefKeyBindingViewController")
@@ -23,7 +23,7 @@ class PrefKeyBindingViewController: NSViewController, PreferenceWindowEmbeddable
   }
 
   var preferenceTabImage: NSImage {
-    return NSImage(named: NSImage.Name("pref_kb"))!
+    return makeSymbol("keyboard.badge.ellipsis", fallbackImage: "pref_kb")
   }
 
   var preferenceContentIsScrollable: Bool {
@@ -35,6 +35,7 @@ class PrefKeyBindingViewController: NSViewController, PreferenceWindowEmbeddable
     "mpv Default": "input",
     "VLC Default": "vlc-default-input",
     "Movist Default": "movist-default-input",
+    "Movist v2 Default": "movist-v2-default-input",
   ]
 
   let fallbackDefault = "IINA Default"
@@ -98,9 +99,7 @@ class PrefKeyBindingViewController: NSViewController, PreferenceWindowEmbeddable
 
     removeKmBtn.isEnabled = false
 
-    if #available(macOS 10.13, *) {
-      useMediaKeysButton.title = NSLocalizedString("preference.system_media_control", comment: "Use system media control")
-    }
+    useMediaKeysButton.title = NSLocalizedString("preference.system_media_control", comment: "Use system media control")
 
     // Load the config file saved in user default
     loadConfigFile(Preference.string(for: .currentInputConfigName), true)
@@ -273,11 +272,14 @@ class PrefKeyBindingViewController: NSViewController, PreferenceWindowEmbeddable
     
     func fallback() {
       isLoadingConfig = false
-      Utility.showAlert("keybinding_config.error", arguments: [currentConfName], sheetWindow: view.window)
+      DispatchQueue.main.async {
+        Utility.showAlert("keybinding_config.error", arguments: [configName ?? "Unknown"], sheetWindow: self.view.window)
+      }
       loadConfigFile(fallbackDefault)
     }
 
-    guard let configName = configName else { fallback(); return }
+    guard let configName = configName,
+          let confFilePath = getFilePath(forConfig: configName, showAlert: false) else { fallback(); return }
     
     cachedConfigNames = configNames
     confTableView.reloadData()
@@ -285,10 +287,10 @@ class PrefKeyBindingViewController: NSViewController, PreferenceWindowEmbeddable
       confTableView.selectRowIndexes(IndexSet(integer: index), byExtendingSelection: false)
     }
     currentConfName = configName
-    currentConfFilePath = getFilePath(forConfig: configName)!
+    currentConfFilePath = confFilePath
     
     guard let mapping = KeyMapping.parseInputConf(at: currentConfFilePath) else { fallback(); return }
-
+    
     mappingController.content = nil
     mappingController.add(contentsOf: mapping)
     mappingController.setSelectionIndexes(IndexSet())
